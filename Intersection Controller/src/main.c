@@ -15,6 +15,7 @@
 #include <windows.h>
 
 // === ИНИЦИАЛИЗАЦИЯ ГЛОБАЛЬНЫХ ПЕРЕМЕННЫХ ===
+
 GameState currentState = STATE_MENU;
 GLFWwindow* window = NULL;
 
@@ -37,6 +38,8 @@ int gameMap[MAP_HEIGHT][MAP_WIDTH] = { 0 }; // Матрица карты
 
 Vehicle vehicles[MAX_VEHICLES] = { 0 };
 int currentBrush = TILE_ROAD_RIGHT; // Плитка по умолчанию
+
+float deltaTime = 0.0f;
 
 void error_callback(int error, const char* desc) {
     fprintf(stderr, "GLFW Error: %s\n", desc);
@@ -104,17 +107,21 @@ int main(int argc, char** argv) {
 
     printf("Traffic Simulator started successfully.\n");
 
+    double lastTime = glfwGetTime();
     while (!glfwWindowShouldClose(window) && currentState != STATE_EXIT) {
+        double currentTime = glfwGetTime();
+        deltaTime = (float)(currentTime - lastTime);
+        lastTime = currentTime;
+
         if (currentState == STATE_SIMULATION) {
             if (!isEditMode) {
-                updateVehicles(); // Обновление машин
-                spawnLogic();     // Обработка спавна машин
+                updateVehicles(deltaTime);
+                spawnLogic(deltaTime);
             }
         }
         render();
         glfwSwapBuffers(window);
         glfwPollEvents();
-
         limit_fps(60);
     }
 

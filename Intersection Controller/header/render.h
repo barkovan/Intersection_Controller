@@ -14,7 +14,7 @@ void drawText(GLuint fontBase, float x, float y, const char* text);
 void render(void);
 
 // Логика машин
-void updateVehicles(void);
-void spawnLogic(void);
+void updateVehicles(float dt);
+void spawnLogic(float dt);
 
 #endif

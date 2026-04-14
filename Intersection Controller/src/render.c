@@ -249,6 +249,8 @@ static void drawTile(int x, int y, int type) {
     }
 }
 
+
+
 bool isDirectionSafe(int gx, int gy, int dx, int dy) {
     // Проверка на возможность поворота на перекрестке (чтобы на встречку не повернуть)
     int cx = gx + dx;
@@ -281,79 +283,114 @@ bool isDirectionSafe(int gx, int gy, int dx, int dy) {
     return false;
 }
 
-void updateVehicles() {
-    // Основной цикл обновления физики и логики всех автомобилей
+void updateVehicles(float dt) {
     for (int i = 0; i < MAX_VEHICLES; i++) {
         if (!vehicles[i].active) continue;
+        Vehicle* v = &vehicles[i];
 
-        int carAhead = 0; // 0 - можно ехать, 1 - нужно стоять
+        // Текущая клетка и следующая по курсу
+        int currGx = (int)(v->x / 40.0f);
+        int currGy = (int)(v->y / 40.0f);
+        int nextGx = currGx + v->dirX;
+        int nextGy = currGy + v->dirY;
 
-        // --- 1. ПРОВЕРКА КРАСНОГО СВЕТОФОРА ---
-        // Узнаем текущую клетку машины
-        int currGx = (int)(vehicles[i].x / 40.0f);
-        int currGy = (int)(vehicles[i].y / 40.0f);
-
-        // Узнаем, какая клетка находится прямо по курсу
-        int nextGx = currGx + vehicles[i].dirX;
-        int nextGy = currGy + vehicles[i].dirY;
-
+        // Проверка, нужно ли остановиться перед красным светофором
+        int mustStopForRed = 0;
         if (nextGx >= 0 && nextGx < MAP_WIDTH && nextGy >= 0 && nextGy < MAP_HEIGHT) {
-            // Если впереди красный светофор
             if (gameMap[nextGy][nextGx] == TILE_TRAFFIC_LIGHT_RED) {
-                float centerX = currGx * 40.0f + 20.0f;
-                float centerY = currGy * 40.0f + 20.0f;
-
-                // Если машина доехала до центра или переехала его — жестко стопорим в центре
-                if (vehicles[i].dirX > 0 && vehicles[i].x >= centerX) { carAhead = 1; vehicles[i].x = centerX; }
-                else if (vehicles[i].dirX < 0 && vehicles[i].x <= centerX) { carAhead = 1; vehicles[i].x = centerX; }
-                else if (vehicles[i].dirY > 0 && vehicles[i].y >= centerY) { carAhead = 1; vehicles[i].y = centerY; }
-                else if (vehicles[i].dirY < 0 && vehicles[i].y <= centerY) { carAhead = 1; vehicles[i].y = centerY; }
+                mustStopForRed = 1;
             }
         }
 
-        // --- 2. ПРОВЕРКА ДИСТАНЦИИ ДО ДРУГИХ МАШИН ---
-        if (vehicles[i].dirX != 0 || vehicles[i].dirY != 0) {
+        // Расстояние до точки остановки (центр текущей клетки)
+        float stopX = currGx * 40.0f + 20.0f;
+        float stopY = currGy * 40.0f + 20.0f;
+        float distToStop = 0.0f;
+        if (v->dirX > 0)      distToStop = stopX - v->x;
+        else if (v->dirX < 0) distToStop = v->x - stopX;
+        else if (v->dirY > 0) distToStop = stopY - v->y;
+        else if (v->dirY < 0) distToStop = v->y - stopY;
+
+        // Проверка дистанции до других машин
+        float distToCar = 10000.0f;
+        for (int j = 0; j < MAX_VEHICLES; j++) {
+            if (i == j || !vehicles[j].active) continue;
+            Vehicle* other = &vehicles[j];
+            float dx = other->x - v->x;
+            float dy = other->y - v->y;
+            if ((v->dirX > 0 && dx > 0 && fabsf(dy) < 15.0f) ||
+                (v->dirX < 0 && dx < 0 && fabsf(dy) < 15.0f) ||
+                (v->dirY > 0 && dy > 0 && fabsf(dx) < 15.0f) ||
+                (v->dirY < 0 && dy < 0 && fabsf(dx) < 15.0f))
+            {
+                float dist = sqrtf(dx * dx + dy * dy) - 16.0f;
+                if (dist < distToCar) distToCar = dist;
+            }
+        }
+
+        // Определяем желаемую скорость
+        float desiredSpeed = VEHICLE_MAX_SPEED;
+        float obstacleDist = distToCar;
+
+        if (mustStopForRed) {
+            // Если впереди красный, точка остановки - центр текущей клетки
+            if (distToStop < obstacleDist) obstacleDist = distToStop;
+        }
+
+        // Ограничение скорости по тормозному пути
+        if (obstacleDist < 1000.0f) {
+            float maxSafe = sqrtf(2.0f * VEHICLE_DECELERATION * obstacleDist);
+            if (maxSafe < desiredSpeed) desiredSpeed = maxSafe;
+        }
+        if (obstacleDist <= 2.0f) desiredSpeed = 0.0f;
+
+        // Плавное изменение скорости
+        if (v->speed < desiredSpeed) {
+            v->speed += VEHICLE_ACCELERATION * dt;
+            if (v->speed > desiredSpeed) v->speed = desiredSpeed;
+        }
+        else if (v->speed > desiredSpeed) {
+            v->speed -= VEHICLE_DECELERATION * dt;
+            if (v->speed < desiredSpeed) v->speed = desiredSpeed;
+        }
+
+        // Авария при столкновении с другой машиной
+        if (distToCar < 2.0f && v->speed > 10.0f) {
             for (int j = 0; j < MAX_VEHICLES; j++) {
                 if (i == j || !vehicles[j].active) continue;
-
-                float distX = vehicles[j].x - vehicles[i].x;
-                float distY = vehicles[j].y - vehicles[i].y;
-                float dist = sqrtf(distX * distX + distY * distY);
-
-                // Если машина впереди слишком близко - тормозим
-                if (dist < 35.0f) {
-                    if ((vehicles[i].dirX > 0 && distX > 0 && fabsf(distY) < 15.0f) ||
-                        (vehicles[i].dirX < 0 && distX < 0 && fabsf(distY) < 15.0f) ||
-                        (vehicles[i].dirY > 0 && distY > 0 && fabsf(distX) < 15.0f) ||
-                        (vehicles[i].dirY < 0 && distY < 0 && fabsf(distX) < 15.0f)) {
-                        carAhead = 1;
-                        break;
-                    }
+                Vehicle* other = &vehicles[j];
+                float dx = other->x - v->x;
+                float dy = other->y - v->y;
+                if ((v->dirX > 0 && dx > 0 && fabsf(dy) < 15.0f) ||
+                    (v->dirX < 0 && dx < 0 && fabsf(dy) < 15.0f) ||
+                    (v->dirY > 0 && dy > 0 && fabsf(dx) < 15.0f) ||
+                    (v->dirY < 0 && dy < 0 && fabsf(dx) < 15.0f))
+                {
+                    other->active = 0;
+                    break;
                 }
             }
-        }
-
-        // --- 3. ДВИЖЕНИЕ И ПОЗИЦИОНИРОВАНИЕ ---
-        float prevX = vehicles[i].x;
-        float prevY = vehicles[i].y;
-
-        // Перемещаем машину согласно вектору скорости, если нет машин впереди
-        if (!carAhead) {
-            vehicles[i].x += vehicles[i].dirX * vehicles[i].speed;
-            vehicles[i].y += vehicles[i].dirY * vehicles[i].speed;
-        }
-
-        // Рассчитываем координаты в сетке карты (gx, gy)
-        int gx = (int)(prevX / 40.0f);
-        int gy = (int)(prevY / 40.0f);
-
-        // Если выехали за границы карты или на траву — удаляем машину
-        if (gx < 0 || gx >= MAP_WIDTH || gy < 0 || gy >= MAP_HEIGHT) {
-            vehicles[i].active = 0;
+            v->active = 0;
             continue;
         }
-        else if (gameMap[gy][gx] == TILE_GRASS) {
-            vehicles[i].active = 0;
+
+        // Движение (если не упираемся в красный светофор на нулевой скорости)
+        float move = v->speed * dt;
+        float prevX = v->x, prevY = v->y;
+        if (!(mustStopForRed && fabs(distToStop) < 1.0f && v->speed < 1.0f)) {
+            v->x += v->dirX * move;
+            v->y += v->dirY * move;
+        }
+
+        // Проверка выхода за границы / на траву
+        int gx = (int)(v->x / 40.0f);
+        int gy = (int)(v->y / 40.0f);
+        if (gx < 0 || gx >= MAP_WIDTH || gy < 0 || gy >= MAP_HEIGHT) {
+            v->active = 0;
+            continue;
+        }
+        if (gameMap[gy][gx] == TILE_GRASS) {
+            v->active = 0;
             continue;
         }
 
@@ -361,97 +398,79 @@ void updateVehicles() {
         float centerX = (float)gx * 40.0f + 20.0f;
         float centerY = (float)gy * 40.0f + 20.0f;
 
-        // Если машина вышла с перекрестка на обычную дорогу - разрешаем повороты
-        if (tile != TILE_INTERSECT) {
-            vehicles[i].canTurn = 1;
+        if (tile != TILE_INTERSECT) v->canTurn = 1;
+
+        // Пересечение центра клетки
+        int crossedCenter = 0;
+        if (v->dirX == 0 && v->dirY == 0) {
+            crossedCenter = 1;
+        }
+        else if (v->dirX > 0 && prevX <= centerX && v->x >= centerX) {
+            crossedCenter = 1;
+        }
+        else if (v->dirX < 0 && prevX >= centerX && v->x <= centerX) {
+            crossedCenter = 1;
+        }
+        else if (v->dirY > 0 && prevY <= centerY && v->y >= centerY) {
+            crossedCenter = 1;
+        }
+        else if (v->dirY < 0 && prevY >= centerY && v->y <= centerY) {
+            crossedCenter = 1;
         }
 
-        // --- 4. ПЕРЕСЕЧЕНИЕ ПЛИТКИ И ПРИНЯТИЕ РЕШЕНИЙ ---
-        int crossedCenter = 0;
-        // Проверяем, проехала ли машина точку центра тайла в этом кадре
-        if (vehicles[i].dirX > 0 && prevX <= centerX && vehicles[i].x >= centerX) crossedCenter = 1;
-        else if (vehicles[i].dirX < 0 && prevX >= centerX && vehicles[i].x <= centerX) crossedCenter = 1;
-        else if (vehicles[i].dirY > 0 && prevY <= centerY && vehicles[i].y >= centerY) crossedCenter = 1;
-        else if (vehicles[i].dirY < 0 && prevY >= centerY && vehicles[i].y <= centerY) crossedCenter = 1;
-        else if (vehicles[i].dirX == 0 && vehicles[i].dirY == 0) crossedCenter = 1;
-
         if (crossedCenter) {
-            // Принудительно выравниваем по центру для точности
-            vehicles[i].x = centerX;
-            vehicles[i].y = centerY;
+            v->x = centerX;
+            v->y = centerY;
 
-            // Обычная дорога: задаем жесткое направление
-            if (tile == TILE_ROAD_RIGHT) { vehicles[i].dirX = 1;  vehicles[i].dirY = 0; }
-            else if (tile == TILE_ROAD_LEFT) { vehicles[i].dirX = -1; vehicles[i].dirY = 0; }
-            else if (tile == TILE_ROAD_UP) { vehicles[i].dirX = 0;  vehicles[i].dirY = -1; }
-            else if (tile == TILE_ROAD_DOWN) { vehicles[i].dirX = 0;  vehicles[i].dirY = 1; }
-
-            // Перекресток: выбираем случайный безопасный путь
+            // Выбор направления в зависимости от типа клетки
+            if (tile == TILE_ROAD_RIGHT) { v->dirX = 1;  v->dirY = 0; }
+            else if (tile == TILE_ROAD_LEFT) { v->dirX = -1; v->dirY = 0; }
+            else if (tile == TILE_ROAD_UP) { v->dirX = 0;  v->dirY = -1; }
+            else if (tile == TILE_ROAD_DOWN) { v->dirX = 0;  v->dirY = 1; }
             else if (tile == TILE_INTERSECT) {
-                if (vehicles[i].canTurn == 1) {
+                if (v->canTurn) {
                     int possibleDirs[4][2] = { {1,0}, {-1,0}, {0,1}, {0,-1} };
-                    int validDirs[4];
+                    int validIndices[4];
                     int validCount = 0;
-                    int straightIdx = -1;
-
                     for (int d = 0; d < 4; d++) {
                         int vx = possibleDirs[d][0];
                         int vy = possibleDirs[d][1];
-
-                        // Исключаем разворот назад
-                        if (vx == -vehicles[i].dirX && vy == -vehicles[i].dirY && (vehicles[i].dirX != 0 || vehicles[i].dirY != 0))
+                        if (vx == -v->dirX && vy == -v->dirY && (v->dirX != 0 || v->dirY != 0))
                             continue;
-
-                        // Проверка на встречку
                         if (isDirectionSafe(gx, gy, vx, vy)) {
-                            validDirs[validCount] = d;
-                            if (vx == (int)vehicles[i].dirX && vy == (int)vehicles[i].dirY) straightIdx = validCount;
-                            validCount++;
+                            validIndices[validCount++] = d;
                         }
                     }
-
                     if (validCount > 0) {
-                        int choice = -1;
-                        // 70% шанс поехать прямо, если это возможно
-                        if (straightIdx != -1) {
-                            if (rand() % 100 < 70) choice = validDirs[straightIdx];
-                            else choice = validDirs[rand() % validCount];
-                        }
-                        else choice = validDirs[rand() % validCount];
-
+                        int choice = validIndices[rand() % validCount]; // равновероятный выбор
                         float newDirX = (float)possibleDirs[choice][0];
                         float newDirY = (float)possibleDirs[choice][1];
-
-                        // Блокируем повторный поворот на этом же перекрестке
-                        if (newDirX != vehicles[i].dirX || newDirY != vehicles[i].dirY) {
-                            vehicles[i].canTurn = 0;
-                        }
-
-                        vehicles[i].dirX = newDirX;
-                        vehicles[i].dirY = newDirY;
+                        if (newDirX != v->dirX || newDirY != v->dirY)
+                            v->canTurn = 0;
+                        v->dirX = newDirX;
+                        v->dirY = newDirY;
                     }
                 }
             }
-            // Логика выезда из спавнера
             else if (tile == TILE_SPAWN) {
                 int possibleDirs[4][2] = { {1,0}, {-1,0}, {0,1}, {0,-1} };
-                int validDirs[4];
+                int validIndices[4];
                 int validCount = 0;
                 for (int d = 0; d < 4; d++) {
                     if (isDirectionSafe(gx, gy, possibleDirs[d][0], possibleDirs[d][1]))
-                        validDirs[validCount++] = d;
+                        validIndices[validCount++] = d;
                 }
                 if (validCount > 0) {
-                    int choice = validDirs[rand() % validCount];
-                    vehicles[i].dirX = possibleDirs[choice][0];
-                    vehicles[i].dirY = possibleDirs[choice][1];
-                    vehicles[i].canTurn = 1;
+                    int choice = validIndices[rand() % validCount];
+                    v->dirX = possibleDirs[choice][0];
+                    v->dirY = possibleDirs[choice][1];
+                    v->canTurn = 1;
                 }
             }
 
-            // Минимальное смещение, чтобы не залипнуть в центре в следующем кадре
-            vehicles[i].x += vehicles[i].dirX * 0.05f;
-            vehicles[i].y += vehicles[i].dirY * 0.05f;
+            // Небольшой сдвиг, чтобы не застрять
+            v->x += v->dirX * 0.1f;
+            v->y += v->dirY * 0.1f;
         }
     }
 }
@@ -470,29 +489,26 @@ void drawVehicles() {
     }
 }
 
-void spawnLogic() {
-    // Появление новых машин раз в 3 секунды
-    static double lastSpawnTime = 0;
+void spawnLogic(float dt) {
+    static double lastSpawnTime = 0.0;
     double currentTime = glfwGetTime();
 
-    if (currentTime - lastSpawnTime < 3) return; // Таймер спавна
+    if (currentTime - lastSpawnTime < VEHICLE_SPAWN_INTERVAL) return;
 
     for (int y = 0; y < MAP_HEIGHT; y++) {
         for (int x = 0; x < MAP_WIDTH; x++) {
             if (gameMap[y][x] == TILE_SPAWN) {
                 for (int i = 0; i < MAX_VEHICLES; i++) {
                     if (!vehicles[i].active) {
-                        // Инициализация новой машины
                         vehicles[i].active = 1;
                         vehicles[i].x = (float)x * 40 + 20;
                         vehicles[i].y = (float)y * 40 + 20;
-                        vehicles[i].speed = 1.5f;
+                        vehicles[i].speed = 0.0f;
                         vehicles[i].dirX = 0;
                         vehicles[i].dirY = 0;
                         vehicles[i].canTurn = 1;
-
                         lastSpawnTime = currentTime;
-                        return; // За раз спавним только одну машину
+                        return;
                     }
                 }
             }
@@ -538,6 +554,16 @@ void render(void) {
             }
         }
         drawVehicles();
+
+        // Отладка: показать скорость первой активной машины
+        for (int i = 0; i < MAX_VEHICLES; i++) {
+            if (vehicles[i].active) {
+                char speedText[32];
+                sprintf(speedText, "Speed: %.1f px/s", vehicles[i].speed);
+                drawText(fontBase, 30, 190, speedText);
+                break;
+            }
+        }
 
         // HUD
         if (isEditMode) {

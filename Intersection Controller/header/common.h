@@ -69,14 +69,19 @@ typedef enum {
 
 extern int gameMap[MAP_HEIGHT][MAP_WIDTH];
 
+// Общие настройки физики (пока без уровней)
+#define VEHICLE_MAX_SPEED       120.0f  // пикселей в секунду
+#define VEHICLE_ACCELERATION    200.0f
+#define VEHICLE_DECELERATION    250.0f
+#define VEHICLE_SPAWN_INTERVAL  3.0f    // секунд между спавнами
+
 // Машина
 typedef struct {
     float x, y;      // Координаты
-    float speed;     // Скорость
+    float speed;     // Текущая скорость (пикселей в секунду)
     int dirX, dirY;  // Направление (-1, 0, 1)
     int active;      // Активна ли
-    int canTurn; // Может ли повернуть
-
+    int canTurn;     // Может ли повернуть
 } Vehicle;
 
 #define MAX_VEHICLES 20
