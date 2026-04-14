@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <windows.h>
 
 // === ИНИЦИАЛИЗАЦИЯ ГЛОБАЛЬНЫХ ПЕРЕМЕННЫХ ===
 GameState currentState = STATE_MENU;
@@ -39,6 +40,22 @@ int currentBrush = TILE_ROAD_RIGHT; // Плитка по умолчанию
 
 void error_callback(int error, const char* desc) {
     fprintf(stderr, "GLFW Error: %s\n", desc);
+}
+
+void limit_fps(int target_fps) {
+    static clock_t last_time = 0;
+    clock_t current_time = clock();
+    double target_frame_time = CLOCKS_PER_SEC / target_fps;
+    double elapsed = current_time - last_time;
+
+    if (last_time != 0 && elapsed < target_frame_time) {
+        long sleep_ms = (long)((target_frame_time - elapsed) * 1000 / CLOCKS_PER_SEC);
+        if (sleep_ms > 0) {
+            Sleep(sleep_ms);
+        }
+    }
+
+    last_time = current_time;
 }
 
 int main(int argc, char** argv) {
@@ -97,6 +114,8 @@ int main(int argc, char** argv) {
         render();
         glfwSwapBuffers(window);
         glfwPollEvents();
+
+        limit_fps(60);
     }
 
     if (fontBaseTitle) glDeleteLists(fontBaseTitle, 256);
