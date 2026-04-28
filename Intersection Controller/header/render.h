@@ -17,4 +17,6 @@ void render(void);
 void updateVehicles(float dt);
 void spawnLogic(float dt);
 
+void updateTrafficLights(void);
+
 #endif
