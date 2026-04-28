@@ -148,6 +148,7 @@
     <ClInclude Include="header\common.h" />
     <ClInclude Include="header\input.h" />
     <ClInclude Include="header\render.h" />
+    <ClInclude Include="stb_image.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

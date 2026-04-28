@@ -8,20 +8,23 @@ void initButtons(void) {
     float btnH = GY(1.5f); // Высота 60 пикселей
     float startX = GX(10); // Отступ
 
-    buttons[0] = (Button){ startX, GY(5), btnW, btnH, "Start Simulation", "Menu" };
-    buttons[1] = (Button){ startX, GY(7), btnW, btnH, "Load Saved Game", "Menu" };
-    buttons[2] = (Button){ startX, GY(9), btnW, btnH, "High Scores", "Menu" };
-    buttons[3] = (Button){ startX, GY(11), btnW, btnH, "Help", "Menu" };
-    buttons[4] = (Button){ startX, GY(13), btnW, btnH, "Exit", "Menu" };
+    buttons[0] = (Button){ startX, GY(10), btnW, btnH, "Start Simulation", "Menu" };
+    buttons[1] = (Button){ startX, GY(11.5), btnW, btnH, "Load Saved Game", "Menu" };
+    buttons[2] = (Button){ startX, GY(13), btnW, btnH, "High Scores", "Menu" };
+    buttons[3] = (Button){ startX, GY(14.5), btnW, btnH, "Help", "Menu" };
+    buttons[4] = (Button){ startX, GY(16), btnW, btnH, "Exit", "Menu" };
 }
 
 void initLevelButtons(void) {
     // Инициализация кнопок выбора уровня
     float size = GX(6); // Размер кнопки 240x240 пикселей
 
-    levelButtons[0] = (Button){ GX(4),  GY(7), size, size, "Easy", "Level" };
-    levelButtons[1] = (Button){ GX(13), GY(7), size, size, "Medium", "Level" };
-    levelButtons[2] = (Button){ GX(22), GY(7), size, size, "Hard", "Level" };
+    levelButtons[0] = (Button){ GX(4),  GY(5), size, size, "Easy", "Level" };
+    levelButtons[1] = (Button){ GX(13), GY(5), size, size, "Medium", "Level" };
+    levelButtons[2] = (Button){ GX(22), GY(5), size, size, "Hard", "Level" };
+
+    // Песочница
+    levelButtons[3] = (Button){ GX(11), GY(11), GX(10), GY(6), "Sandbox", "Level"};
 }
 
 void cursor_position_callback(GLFWwindow* w, double x, double y) {
@@ -49,11 +52,16 @@ void mouse_button_callback(GLFWwindow* w, int button, int action, int mods) {
         }
     }
     else if (currentState == STATE_LEVEL_SELECT) {
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 4; i++) {
             if (mouseX > levelButtons[i].x && mouseX < levelButtons[i].x + levelButtons[i].width &&
                 mouseY > levelButtons[i].y && mouseY < levelButtons[i].y + levelButtons[i].height) {
 
-                currentLevel = i + 1;
+                if (i < 3) {
+                    currentLevel = i + 1;   // 1,2,3
+                }
+                else {
+                    currentLevel = 0;       // песочница
+                }
                 currentState = STATE_SIMULATION;
                 return;
             }
@@ -79,10 +87,14 @@ void mouse_button_callback(GLFWwindow* w, int button, int action, int mods) {
                     if (button == GLFW_MOUSE_BUTTON_LEFT) {
                         int tile = gameMap[gridY][gridX];
                         if (tile == TILE_TRAFFIC_LIGHT_GREEN) {
-                            gameMap[gridY][gridX] = TILE_TRAFFIC_LIGHT_RED;
+                            gameMap[gridY][gridX] = TILE_TRAFFIC_LIGHT_YELLOW;
+                            yellowToGreen[gridY][gridX] = false;
+                            trafficLightTimer[gridY][gridX] = glfwGetTime();
                         }
                         else if (tile == TILE_TRAFFIC_LIGHT_RED) {
-                            gameMap[gridY][gridX] = TILE_TRAFFIC_LIGHT_GREEN;
+                            gameMap[gridY][gridX] = TILE_TRAFFIC_LIGHT_YELLOW;
+                            yellowToGreen[gridY][gridX] = true;
+                            trafficLightTimer[gridY][gridX] = glfwGetTime();
                         }
                     }
                 }
