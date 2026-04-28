@@ -23,17 +23,6 @@ typedef struct {
     const char* type;
 } Button;
 
-// Текстуры кнопок
-extern GLuint uiButtonTex;
-extern GLuint uiButtonHoverTex;
-extern GLuint titlePlateTex;
-
-extern GLuint carTex;
-
-// Функция загрузки текстуры
-GLuint loadTexture(const char* filename);
-
-
 // Глобальные переменные
 extern GameState currentState;
 extern GLFWwindow* window;
@@ -51,7 +40,7 @@ extern GLuint fontBaseHov;
 
 // UI элементы
 extern Button buttons[5];
-extern Button levelButtons[4];
+extern Button levelButtons[3];
 extern float buttonScale[10];
 
 // Сетка для UI
@@ -65,9 +54,6 @@ extern int showDebugGrid;
 #define MAP_WIDTH 32
 #define MAP_HEIGHT 18
 
-// Желтый у светофора
-#define YELLOW_DURATION 1.0
-
 typedef enum {
     TILE_GRASS = 0,
     TILE_ROAD_RIGHT,
@@ -75,7 +61,6 @@ typedef enum {
     TILE_ROAD_UP,
     TILE_ROAD_DOWN,
     TILE_TRAFFIC_LIGHT_GREEN, // Светофор
-    TILE_TRAFFIC_LIGHT_YELLOW,
     TILE_TRAFFIC_LIGHT_RED,
     TILE_INTERSECT, // Перекресток
     TILE_SPAWN       // Точка спавна
@@ -83,10 +68,6 @@ typedef enum {
 } TileType;
 
 extern int gameMap[MAP_HEIGHT][MAP_WIDTH];
-
-// для светофора
-extern float trafficLightTimer[MAP_HEIGHT][MAP_WIDTH];
-extern bool yellowToGreen[MAP_HEIGHT][MAP_WIDTH];
 
 // Общие настройки физики (пока без уровней)
 #define VEHICLE_MAX_SPEED       120.0f  // пикселей в секунду
@@ -104,7 +85,7 @@ typedef struct {
 } Vehicle;
 
 #define MAX_VEHICLES 20
-extern Vehicle vehicles[MAX_VEHICLES];
+Vehicle vehicles[MAX_VEHICLES];
 extern int currentBrush; // Текущая плитка
 
 #endif // COMMON_H
