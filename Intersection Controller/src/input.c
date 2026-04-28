@@ -17,7 +17,7 @@ void initButtons(void) {
 
 void initLevelButtons(void) {
     // Инициализация кнопок выбора уровня
-    float size = GX(6); // Размер кнопки 240x240 пикселей
+    float size = GX(6); // Размер кнопки 240x240
 
     levelButtons[0] = (Button){ GX(4),  GY(7), size, size, "Easy", "Level" };
     levelButtons[1] = (Button){ GX(13), GY(7), size, size, "Medium", "Level" };
