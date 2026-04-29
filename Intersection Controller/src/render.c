@@ -13,12 +13,13 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "../header/stb_image.h"
 
-// Глобальная переменная для пульсации при наведении
-float hoverPulse = 0.0f;
+// ========== ПЕРЕМЕННЫЕ ==========
 
-// Массив hover-текстур
-GLuint buttonHoverTextures[5] = { 0 };
+float hoverPulse = 0.0f;   // для анимации пульсации кнопок
 
+// ========== ЗАГРУЗКА ТЕКСТУР ==========
+
+// Загружает PNG-файл, возвращает ID текстуры OpenGL
 GLuint loadTexture(const char* filename) {
     int width, height, channels;
     unsigned char* data = stbi_load(filename, &width, &height, &channels, 4);
@@ -30,9 +31,7 @@ GLuint loadTexture(const char* filename) {
     GLuint textureID;
     glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_2D, textureID);
-
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
@@ -41,13 +40,14 @@ GLuint loadTexture(const char* filename) {
     return textureID;
 }
 
+// ========== ШРИФТЫ ==========
+
+// Создаёт крупный шрифт для заголовка
 void buildTitleFont(void) {
-    // Шрифт названия игры
     HDC hDC = wglGetCurrentDC();
     HFONT hFont = CreateFont(130, 0, 0, 0, FW_BOLD, FALSE, FALSE, FALSE,
         DEFAULT_CHARSET, OUT_TT_PRECIS, CLIP_DEFAULT_PRECIS,
         ANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, TEXT("Beat Mark"));
-
     HFONT oldFont = (HFONT)SelectObject(hDC, hFont);
     fontBaseTitle = glGenLists(256);
     wglUseFontBitmaps(hDC, 0, 256, fontBaseTitle);
@@ -55,13 +55,12 @@ void buildTitleFont(void) {
     DeleteObject(hFont);
 }
 
+// Создаёт обычный шрифт (30pt)
 void buildBaseFont(void) {
-    // Шрифт по умолчанию
     HDC hDC = wglGetCurrentDC();
     HFONT hFont = CreateFont(30, 0, 0, 0, FW_BOLD, FALSE, FALSE, FALSE,
         ANSI_CHARSET, OUT_TT_PRECIS, CLIP_DEFAULT_PRECIS,
         ANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, TEXT("Arial"));
-
     HFONT oldFont = (HFONT)SelectObject(hDC, hFont);
     fontBase = glGenLists(256);
     wglUseFontBitmaps(hDC, 0, 256, fontBase);
@@ -69,13 +68,12 @@ void buildBaseFont(void) {
     DeleteObject(hFont);
 }
 
+// Создаёт увеличенный шрифт (40pt) для пунктов меню при наведении
 void buildBaseFontHov(void) {
-    // Увеличенный шрифт по умолчанию
     HDC hDC = wglGetCurrentDC();
     HFONT hFont = CreateFont(40, 0, 0, 0, FW_BOLD, FALSE, FALSE, FALSE,
         ANSI_CHARSET, OUT_TT_PRECIS, CLIP_DEFAULT_PRECIS,
         ANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, TEXT("Arial"));
-
     HFONT oldFont = (HFONT)SelectObject(hDC, hFont);
     fontBaseHov = glGenLists(256);
     wglUseFontBitmaps(hDC, 0, 256, fontBaseHov);
@@ -83,8 +81,8 @@ void buildBaseFontHov(void) {
     DeleteObject(hFont);
 }
 
+// Выводит текст в заданных экранных координатах
 void drawText(GLuint fontBase, float x, float y, const char* text) {
-    // Отрисовка текста
     if (!text) return;
     glColor3f(1.0f, 1.0f, 1.0f);
     glRasterPos2f(x, y);
@@ -92,9 +90,9 @@ void drawText(GLuint fontBase, float x, float y, const char* text) {
     glCallLists((GLsizei)strlen(text), GL_UNSIGNED_BYTE, text);
 }
 
-static void drawButton(const Button* btn, int index, int isHovered);
-static void updateButtons(void);
+// ========== UI: КНОПКИ ==========
 
+// Рисует одну кнопку (обычную или с подсветкой при наведении)
 static void drawButton(const Button* btn, int index, int isHovered) {
     float scale = buttonScale[index];
     float newW = btn->width * scale;
@@ -104,11 +102,11 @@ static void drawButton(const Button* btn, int index, int isHovered) {
 
     GLuint currentTex = isHovered ? uiButtonHoverTex : uiButtonTex;
 
+    // Фон (текстура)
     if (currentTex != 0) {
         glEnable(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, currentTex);
-        // ВАЖНО: Сбрасываем цвет в белый, чтобы текстура не окрасилась в цвет текста
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);   // возвращаем полную яркость
 
         glBegin(GL_QUADS);
         glTexCoord2f(0.0f, 0.0f); glVertex2f(btn->x + offsetX, btn->y + offsetY);
@@ -119,7 +117,7 @@ static void drawButton(const Button* btn, int index, int isHovered) {
         glDisable(GL_TEXTURE_2D);
     }
     else {
-        // Запасной вариант, если текстура не загружена
+        // Запасной вариант – тёмный прямоугольник
         glColor3f(0.18f, 0.18f, 0.18f);
         glBegin(GL_QUADS);
         glVertex2f(btn->x + offsetX, btn->y + offsetY);
@@ -129,29 +127,26 @@ static void drawButton(const Button* btn, int index, int isHovered) {
         glEnd();
     }
 
+    // Текст (разная ширина букв для первой кнопки)
     float charWidth = 14.5f;
+    if (index == 0) charWidth = 12.5f;
 
-    if (index == 0) {
-        charWidth = 12.5f;
-    }
-
-    // Текст
     float textWidth = strlen(btn->text) * charWidth;
     float textX = btn->x + offsetX + (newW - textWidth) / 2.0f;
     float textY = btn->y + offsetY + newH * 0.5f + 11.0f;
 
     if (isHovered) glColor3f(1.0f, 0.92f, 0.70f);
-    else glColor3f(0.95f, 0.95f, 0.95f);
+    else           glColor3f(0.95f, 0.95f, 0.95f);
 
     drawText(fontBase, textX, textY, btn->text);
 }
 
+// Обновляет анимацию масштабирования кнопок при наведении
 static void updateButtons(void) {
     if (currentState == STATE_MENU) {
         for (int i = 0; i < 5; i++) {
             int hovered = (mouseX > buttons[i].x && mouseX < buttons[i].x + buttons[i].width &&
                 mouseY > buttons[i].y && mouseY < buttons[i].y + buttons[i].height);
-
             if (hovered) {
                 buttonScale[i] += 0.09f;
                 if (buttonScale[i] > 1.16f) buttonScale[i] = 1.16f;
@@ -178,25 +173,26 @@ static void updateButtons(void) {
     }
 }
 
+// ========== ОТЛАДОЧНАЯ СЕТКА ==========
+
+// Рисует серую сетку с шагом 40 пикселей
 static void drawDebugGrid(void) {
-    // Отрисовка дебаг сетки
-    glColor3f(0.2f, 0.2f, 0.2f); // Серый
-
+    glColor3f(0.2f, 0.2f, 0.2f);
     glBegin(GL_LINES);
-
     for (int x = 0; x <= 1280; x += GRID_SIZE) {
         glVertex2f((float)x, 0.0f);
         glVertex2f((float)x, 720.0f);
     }
-
     for (int y = 0; y <= 720; y += GRID_SIZE) {
         glVertex2f(0.0f, (float)y);
         glVertex2f(1280.0f, (float)y);
     }
-
     glEnd();
 }
 
+// ========== ОТРИСОВКА КАРТЫ ==========
+
+// Рисует закрашенный круг (для светофоров)
 void drawFilledCircle(float cx, float cy, float radius, int segments) {
     glBegin(GL_TRIANGLE_FAN);
     glVertex2f(cx, cy);
@@ -207,32 +203,35 @@ void drawFilledCircle(float cx, float cy, float radius, int segments) {
     glEnd();
 }
 
+// Рисует одну клетку карты (трава, дорога, перекрёсток, светофор, спавнер)
 static void drawTile(int x, int y, int type) {
     float fx = (float)GX(x);
     float fy = (float)GY(y);
 
+    // Цвет фона клетки
     switch (type) {
-    case TILE_GRASS:     glColor3f(0.1f, 0.4f, 0.1f); break; // Зеленый
+    case TILE_GRASS:                   glColor3f(0.1f, 0.4f, 0.1f); break;
     case TILE_ROAD_RIGHT:
     case TILE_ROAD_LEFT:
     case TILE_ROAD_UP:
     case TILE_ROAD_DOWN:
-    case TILE_INTERSECT: glColor3f(0.2f, 0.2f, 0.2f); break; // Светло-серый
-    case TILE_TRAFFIC_LIGHT_GREEN: glColor3f(0.3f, 0.4f, 0.3f); break;
-    case TILE_TRAFFIC_LIGHT_YELLOW: glColor3f(0.4f, 0.4f, 0.2f); break;
-    case TILE_TRAFFIC_LIGHT_RED: glColor3f(0.4f, 0.3f, 0.3f); break;
-    case TILE_SPAWN: glColor3f(0.1f, 0.1f, 0.1f); break; // Темно-серый
-    default:             glColor3f(0.0f, 0.0f, 0.0f);
+    case TILE_INTERSECT:               glColor3f(0.2f, 0.2f, 0.2f); break;
+    case TILE_TRAFFIC_LIGHT_GREEN:     glColor3f(0.3f, 0.4f, 0.3f); break;
+    case TILE_TRAFFIC_LIGHT_YELLOW:    glColor3f(0.4f, 0.4f, 0.2f); break;
+    case TILE_TRAFFIC_LIGHT_RED:       glColor3f(0.4f, 0.3f, 0.3f); break;
+    case TILE_SPAWN:                   glColor3f(0.1f, 0.1f, 0.1f); break;
+    default:                           glColor3f(0.0f, 0.0f, 0.0f);
     }
 
     glBegin(GL_QUADS);
-    glVertex2f(fx + 1, fy + 1); // Отступ
+    glVertex2f(fx + 1, fy + 1);
     glVertex2f(fx + 39, fy + 1);
     glVertex2f(fx + 39, fy + 39);
     glVertex2f(fx + 1, fy + 39);
     glEnd();
 
-    glColor3f(0.5f, 0.5f, 0.5f); // Отрисовка стрелов движения
+    // Стрелки направления на дорогах
+    glColor3f(0.5f, 0.5f, 0.5f);
     glLineWidth(2.0f);
     glBegin(GL_LINES);
     if (type == TILE_ROAD_RIGHT) {
@@ -256,37 +255,30 @@ static void drawTile(int x, int y, int type) {
         glVertex2f(fx + 20, fy + 30); glVertex2f(fx + 25, fy + 25);
     }
     else if (type == TILE_INTERSECT) {
-        // Отрисовка креста перекрестка
         glVertex2f(fx + 15, fy + 20); glVertex2f(fx + 25, fy + 20);
         glVertex2f(fx + 20, fy + 15); glVertex2f(fx + 20, fy + 25);
     }
     glEnd();
 
+    // Светофор (зелёный/жёлтый/красный круг с ободком)
     if (type == TILE_TRAFFIC_LIGHT_GREEN || type == TILE_TRAFFIC_LIGHT_YELLOW || type == TILE_TRAFFIC_LIGHT_RED) {
         float centerX = fx + 20.0f;
         float centerY = fy + 20.0f;
-        float lightRadius = 10.0f; // Радиус самого света
-        float rimRadius = lightRadius + 1.5f; // Радиус обода (на 1.5 пикселя больше)
+        float lightRadius = 10.0f;
+        float rimRadius = lightRadius + 1.5f;
 
-        // А. Рисуем черный обод (подложку)
-        glColor3f(0.0f, 0.0f, 0.0f); // Черный цвет
+        glColor3f(0.0f, 0.0f, 0.0f);
         drawFilledCircle(centerX, centerY, rimRadius, 30);
 
-        // Б. Рисуем сам свет поверх обода
-        if (type == TILE_TRAFFIC_LIGHT_GREEN) {
-            glColor3f(0.0f, 1.0f, 0.0f); // Ярко-зеленый
-        }
-        else if (type == TILE_TRAFFIC_LIGHT_YELLOW) {
-            glColor3f(1.0f, 1.0f, 0.0f);   // ярко-жёлтый
-        }
-        else {
-            glColor3f(1.0f, 0.0f, 0.0f); // Ярко-красный
-        }
+        if (type == TILE_TRAFFIC_LIGHT_GREEN)       glColor3f(0.0f, 1.0f, 0.0f);
+        else if (type == TILE_TRAFFIC_LIGHT_YELLOW) glColor3f(1.0f, 1.0f, 0.0f);
+        else                                        glColor3f(1.0f, 0.0f, 0.0f);
+
         drawFilledCircle(centerX, centerY, lightRadius, 30);
     }
 
-    else if (type == TILE_SPAWN) {
-        // Отрисовка рамки спавнера
+    // Рамка спавнера
+    if (type == TILE_SPAWN) {
         glColor3f(0.0f, 1.0f, 0.5f);
         glBegin(GL_LINE_LOOP);
         glVertex2f(fx + 5, fy + 5); glVertex2f(fx + 35, fy + 5);
@@ -295,50 +287,48 @@ static void drawTile(int x, int y, int type) {
     }
 }
 
+// ========== НАВИГАЦИЯ МАШИН ==========
+
+// Проверяет, можно ли ехать из клетки (gx,gy) в направлении (dx,dy) – чтобы не выехать на встречку
 bool isDirectionSafe(int gx, int gy, int dx, int dy) {
-    // Проверка на возможность поворота на перекрестке (чтобы на встречку не повернуть)
     int cx = gx + dx;
     int cy = gy + dy;
 
-    // Проход во все стороны от плитки перекрестка
     while (cx >= 0 && cx < MAP_WIDTH && cy >= 0 && cy < MAP_HEIGHT) {
         int tile = gameMap[cy][cx];
 
         if (tile == TILE_INTERSECT || tile == TILE_TRAFFIC_LIGHT_GREEN) {
-            // Если перекресток или зеленый
             cx += dx;
             cy += dy;
             continue;
         }
 
-        // Если дорога, смотрим, чтобы не встречка
         if (dx == 1 && tile == TILE_ROAD_RIGHT) return true;
         if (dx == -1 && tile == TILE_ROAD_LEFT)  return true;
         if (dy == -1 && tile == TILE_ROAD_UP)    return true;
         if (dy == 1 && tile == TILE_ROAD_DOWN)  return true;
+        if (tile == TILE_SPAWN)                  return true;
+        if (tile == TILE_TRAFFIC_LIGHT_GREEN)    return true;
 
-        if (tile == TILE_SPAWN) return true; // Спавнер
-
-        if (tile == TILE_TRAFFIC_LIGHT_GREEN) return true; // Светофор
-
-        // Если встречка или красный
         return false;
     }
     return false;
 }
 
+// ========== ФИЗИКА И ЛОГИКА МАШИН ==========
+
+// Обновляет положение и скорость всех машин
 void updateVehicles(float dt) {
     for (int i = 0; i < MAX_VEHICLES; i++) {
         if (!vehicles[i].active) continue;
         Vehicle* v = &vehicles[i];
 
-        // Текущая клетка и следующая по курсу
         int currGx = (int)(v->x / 40.0f);
         int currGy = (int)(v->y / 40.0f);
         int nextGx = currGx + v->dirX;
         int nextGy = currGy + v->dirY;
 
-        // Проверка, нужно ли остановиться перед красным светофором
+        // Нужно ли останавливаться перед красным или жёлтым светофором
         int mustStopForRed = 0;
         if (nextGx >= 0 && nextGx < MAP_WIDTH && nextGy >= 0 && nextGy < MAP_HEIGHT) {
             if (gameMap[nextGy][nextGx] == TILE_TRAFFIC_LIGHT_RED ||
@@ -347,7 +337,7 @@ void updateVehicles(float dt) {
             }
         }
 
-        // Расстояние до точки остановки (центр текущей клетки)
+        // Расстояние до центра текущей клетки (точка остановки)
         float stopX = currGx * 40.0f + 20.0f;
         float stopY = currGy * 40.0f + 20.0f;
         float distToStop = 0.0f;
@@ -356,7 +346,7 @@ void updateVehicles(float dt) {
         else if (v->dirY > 0) distToStop = stopY - v->y;
         else if (v->dirY < 0) distToStop = v->y - stopY;
 
-        // Проверка дистанции до других машин
+        // Расстояние до ближайшей машины впереди
         float distToCar = 10000.0f;
         for (int j = 0; j < MAX_VEHICLES; j++) {
             if (i == j || !vehicles[j].active) continue;
@@ -366,30 +356,24 @@ void updateVehicles(float dt) {
             if ((v->dirX > 0 && dx > 0 && fabsf(dy) < 15.0f) ||
                 (v->dirX < 0 && dx < 0 && fabsf(dy) < 15.0f) ||
                 (v->dirY > 0 && dy > 0 && fabsf(dx) < 15.0f) ||
-                (v->dirY < 0 && dy < 0 && fabsf(dx) < 15.0f))
-            {
+                (v->dirY < 0 && dy < 0 && fabsf(dx) < 15.0f)) {
                 float dist = sqrtf(dx * dx + dy * dy) - 16.0f;
                 if (dist < distToCar) distToCar = dist;
             }
         }
 
-        // Определяем желаемую скорость
+        // Желаемая скорость с учётом препятствий
         float desiredSpeed = VEHICLE_MAX_SPEED;
         float obstacleDist = distToCar;
+        if (mustStopForRed && distToStop < obstacleDist) obstacleDist = distToStop;
 
-        if (mustStopForRed) {
-            // Если впереди красный, точка остановки - центр текущей клетки
-            if (distToStop < obstacleDist) obstacleDist = distToStop;
-        }
-
-        // Ограничение скорости по тормозному пути
         if (obstacleDist < 1000.0f) {
             float maxSafe = sqrtf(2.0f * VEHICLE_DECELERATION * obstacleDist);
             if (maxSafe < desiredSpeed) desiredSpeed = maxSafe;
         }
         if (obstacleDist <= 2.0f) desiredSpeed = 0.0f;
 
-        // Плавное изменение скорости
+        // Плавное ускорение/замедление
         if (v->speed < desiredSpeed) {
             v->speed += VEHICLE_ACCELERATION * dt;
             if (v->speed > desiredSpeed) v->speed = desiredSpeed;
@@ -399,7 +383,7 @@ void updateVehicles(float dt) {
             if (v->speed < desiredSpeed) v->speed = desiredSpeed;
         }
 
-        // Авария при столкновении с другой машиной
+        // Столкновение (авария)
         if (distToCar < 2.0f && v->speed > 10.0f) {
             for (int j = 0; j < MAX_VEHICLES; j++) {
                 if (i == j || !vehicles[j].active) continue;
@@ -409,8 +393,7 @@ void updateVehicles(float dt) {
                 if ((v->dirX > 0 && dx > 0 && fabsf(dy) < 15.0f) ||
                     (v->dirX < 0 && dx < 0 && fabsf(dy) < 15.0f) ||
                     (v->dirY > 0 && dy > 0 && fabsf(dx) < 15.0f) ||
-                    (v->dirY < 0 && dy < 0 && fabsf(dx) < 15.0f))
-                {
+                    (v->dirY < 0 && dy < 0 && fabsf(dx) < 15.0f)) {
                     other->active = 0;
                     break;
                 }
@@ -419,7 +402,7 @@ void updateVehicles(float dt) {
             continue;
         }
 
-        // Движение (если не упираемся в красный светофор на нулевой скорости)
+        // Движение
         float move = v->speed * dt;
         float prevX = v->x, prevY = v->y;
         if (!(mustStopForRed && fabs(distToStop) < 1.0f && v->speed < 1.0f)) {
@@ -427,7 +410,7 @@ void updateVehicles(float dt) {
             v->y += v->dirY * move;
         }
 
-        // Проверка выхода за границы / на траву
+        // Выезд за границы или на траву – удаление
         int gx = (int)(v->x / 40.0f);
         int gy = (int)(v->y / 40.0f);
         if (gx < 0 || gx >= MAP_WIDTH || gy < 0 || gy >= MAP_HEIGHT) {
@@ -445,7 +428,7 @@ void updateVehicles(float dt) {
 
         if (tile != TILE_INTERSECT) v->canTurn = 1;
 
-        // Пересечение центра клетки
+        // Проверка пересечения центра клетки
         int crossedCenter = 0;
         if (v->dirX == 0 && v->dirY == 0) {
             crossedCenter = 1;
@@ -467,7 +450,7 @@ void updateVehicles(float dt) {
             v->x = centerX;
             v->y = centerY;
 
-            // Выбор направления в зависимости от типа клетки
+            // Выбор нового направления в зависимости от типа клетки
             if (tile == TILE_ROAD_RIGHT) { v->dirX = 1;  v->dirY = 0; }
             else if (tile == TILE_ROAD_LEFT) { v->dirX = -1; v->dirY = 0; }
             else if (tile == TILE_ROAD_UP) { v->dirX = 0;  v->dirY = -1; }
@@ -487,7 +470,7 @@ void updateVehicles(float dt) {
                         }
                     }
                     if (validCount > 0) {
-                        int choice = validIndices[rand() % validCount]; // равновероятный выбор
+                        int choice = validIndices[rand() % validCount];
                         float newDirX = (float)possibleDirs[choice][0];
                         float newDirY = (float)possibleDirs[choice][1];
                         if (newDirX != v->dirX || newDirY != v->dirY)
@@ -513,13 +496,14 @@ void updateVehicles(float dt) {
                 }
             }
 
-            // Небольшой сдвиг, чтобы не застрять
+            // Небольшой сдвиг, чтобы не застрять на центре
             v->x += v->dirX * 0.1f;
             v->y += v->dirY * 0.1f;
         }
     }
 }
 
+// Рисует машину с текстурой и поворотом в зависимости от направления
 void drawVehicle(Vehicle* v) {
     if (!v->active) return;
 
@@ -527,10 +511,10 @@ void drawVehicle(Vehicle* v) {
     glTranslatef(v->x, v->y, 0.0f);
 
     float angle = 0.0f;
-    if (v->dirX == 1)  angle = 0.0f;   // Вправо
-    if (v->dirX == -1) angle = 180.0f; // Влево
-    if (v->dirY == 1)  angle = 90.0f;  // Вниз
-    if (v->dirY == -1) angle = -90.0f; // Вверх
+    if (v->dirX == 1)  angle = 0.0f;
+    if (v->dirX == -1) angle = 180.0f;
+    if (v->dirY == 1)  angle = 90.0f;
+    if (v->dirY == -1) angle = -90.0f;
 
     glRotatef(angle - 90.0f, 0.0f, 0.0f, 1.0f);
 
@@ -555,6 +539,7 @@ void drawVehicle(Vehicle* v) {
     glPopMatrix();
 }
 
+// Появление новых машин на спавнерах раз в VEHICLE_SPAWN_INTERVAL
 void spawnLogic(float dt) {
     static double lastSpawnTime = 0.0;
     double currentTime = glfwGetTime();
@@ -582,7 +567,9 @@ void spawnLogic(float dt) {
     }
 }
 
-// светофор 
+// ========== СВЕТОФОРЫ ==========
+
+// Переключает жёлтый сигнал в зелёный или красный по истечении YELLOW_DURATION
 void updateTrafficLights(void) {
     double now = glfwGetTime();
     for (int y = 0; y < MAP_HEIGHT; y++) {
@@ -603,23 +590,21 @@ void updateTrafficLights(void) {
     }
 }
 
+// ========== ГЛАВНЫЙ РЕНДЕР ==========
+
 void render(void) {
-    // Основной метод отрисовки кадра
-    glClearColor(0.08f, 0.15f, 0.10f, 1.0f); // Темно-зеленый
+    glClearColor(0.08f, 0.15f, 0.10f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    if (showDebugGrid) drawDebugGrid(); // Дебаг сетка
+    if (showDebugGrid) drawDebugGrid();
 
-    updateButtons(); // Обработка нажатий на кнопки
+    updateButtons();
 
-    // Отрисовка МЕНЮ
     if (currentState == STATE_MENU) {
-        // --- 1. РИСУЕМ БОЛЬШУЮ КЛЯКСУ ---
+        // Фоновая клякса
         if (titlePlateTex != 0) {
             glEnable(GL_TEXTURE_2D);
             glBindTexture(GL_TEXTURE_2D, titlePlateTex);
-
-            // Сбрасываем цвет в белый, чтобы текстура была своего натурального цвета
             glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
             float pX = GX(1.0f);
@@ -637,19 +622,17 @@ void render(void) {
             glDisable(GL_TEXTURE_2D);
         }
 
-        // --- 2. РИСУЕМ ТЕКСТ ЗАГОЛОВКА ---
+        // Заголовок текстом
         glColor3f(1.0f, 1.0f, 0.3f);
         drawText(fontBaseTitle, GX(5.6f), GY(6.2f), "TRAFFIC SIMULATOR");
 
-        // --- 3. РИСУЕМ КНОПКИ ---
+        // Кнопки меню
         for (int i = 0; i < 5; i++) {
             int hovered = (mouseX > buttons[i].x && mouseX < buttons[i].x + buttons[i].width &&
                 mouseY > buttons[i].y && mouseY < buttons[i].y + buttons[i].height);
-
             drawButton(&buttons[i], i, hovered);
         }
     }
-    // Отрисовка ВЫБОРА УРОВНЯ
     else if (currentState == STATE_LEVEL_SELECT) {
         glColor3f(1.0f, 1.0f, 0.3f);
         drawText(fontBaseTitle, GX(2.8f), GY(3), "SELECT DIFFICULTY LEVEL");
@@ -659,21 +642,15 @@ void render(void) {
             drawButton(&levelButtons[i], i, hovered);
         }
     }
-    // Отрисовка СИМУЛЯЦИИ
     else if (currentState == STATE_SIMULATION) {
-
-        for (int y = 0; y < MAP_HEIGHT; y++) {
-            for (int x = 0; x < MAP_WIDTH; x++) {
+        // Карта
+        for (int y = 0; y < MAP_HEIGHT; y++)
+            for (int x = 0; x < MAP_WIDTH; x++)
                 drawTile(x, y, gameMap[y][x]);
-            }
-        }
 
-        // Отладка: показать скорость первой активной машины
-        for (int i = 0; i < MAX_VEHICLES; i++) {
-            if (vehicles[i].active) {
-                drawVehicle(&vehicles[i]);
-            }
-        }
+        // Машины
+        for (int i = 0; i < MAX_VEHICLES; i++)
+            if (vehicles[i].active) drawVehicle(&vehicles[i]);
 
         // HUD
         if (isEditMode) {
@@ -693,7 +670,7 @@ void render(void) {
         sprintf(levelText, "CURRENT LEVEL: %d", currentLevel);
         drawText(fontBase, 30, 110, levelText);
 
-        // Текущая выбранная плитка
+        // Текущая кисть редактора
         char brushText[30];
         const char* typeName = "Unknown";
         switch (currentBrush) {

@@ -5,7 +5,7 @@
 #include <GLFW/glfw3.h>
 #include <stdbool.h>
 
-// Игровые состояния
+// Состояния программы
 typedef enum {
     STATE_MENU,
     STATE_LEVEL_SELECT,
@@ -15,24 +15,19 @@ typedef enum {
     STATE_EXIT
 } GameState;
 
-// Кнопка
+// Кнопка интерфейса
 typedef struct {
     float x, y;
     float width, height;
     const char* text;
-    const char* type;
+    const char* type;   // "Menu" или "Level"
 } Button;
 
-// Текстуры кнопок
-extern GLuint uiButtonTex;
-extern GLuint uiButtonHoverTex;
-extern GLuint titlePlateTex;
-
-extern GLuint carTex;
-
-// Функция загрузки текстуры
-GLuint loadTexture(const char* filename);
-
+// Общие текстуры
+extern GLuint uiButtonTex;        // обычная кнопка
+extern GLuint uiButtonHoverTex;   // кнопка при наведении
+extern GLuint titlePlateTex;      // клякса для заголовка меню
+extern GLuint carTex;             // текстура автомобиля
 
 // Глобальные переменные
 extern GameState currentState;
@@ -40,8 +35,6 @@ extern GLFWwindow* window;
 
 extern int mouseX, mouseY;
 extern int currentLevel;
-
-// Флаг режима редактирования (1 - Edit, 0 - Play)
 extern int isEditMode;
 
 // Шрифты
@@ -49,12 +42,12 @@ extern GLuint fontBaseTitle;
 extern GLuint fontBase;
 extern GLuint fontBaseHov;
 
-// UI элементы
+// UI-элементы
 extern Button buttons[5];
 extern Button levelButtons[4];
 extern float buttonScale[10];
 
-// Сетка для UI
+// Сетка
 #define GRID_SIZE 40
 #define GX(col) ((col) * GRID_SIZE)
 #define GY(row) ((row) * GRID_SIZE)
@@ -65,8 +58,7 @@ extern int showDebugGrid;
 #define MAP_WIDTH 32
 #define MAP_HEIGHT 18
 
-// Желтый у светофора
-#define YELLOW_DURATION 1.0
+#define YELLOW_DURATION 1.0   // длительность жёлтого сигнала (сек)
 
 typedef enum {
     TILE_GRASS = 0,
@@ -74,37 +66,35 @@ typedef enum {
     TILE_ROAD_LEFT,
     TILE_ROAD_UP,
     TILE_ROAD_DOWN,
-    TILE_TRAFFIC_LIGHT_GREEN, // Светофор
+    TILE_TRAFFIC_LIGHT_GREEN,
     TILE_TRAFFIC_LIGHT_YELLOW,
     TILE_TRAFFIC_LIGHT_RED,
-    TILE_INTERSECT, // Перекресток
-    TILE_SPAWN       // Точка спавна
-
+    TILE_INTERSECT,
+    TILE_SPAWN
 } TileType;
 
 extern int gameMap[MAP_HEIGHT][MAP_WIDTH];
 
-// для светофора
+// Светофоры
 extern float trafficLightTimer[MAP_HEIGHT][MAP_WIDTH];
-extern bool yellowToGreen[MAP_HEIGHT][MAP_WIDTH];
+extern bool  yellowToGreen[MAP_HEIGHT][MAP_WIDTH];
 
-// Общие настройки физики (пока без уровней)
-#define VEHICLE_MAX_SPEED       120.0f  // пикселей в секунду
+// Физика автомобилей
+#define VEHICLE_MAX_SPEED       120.0f
 #define VEHICLE_ACCELERATION    200.0f
 #define VEHICLE_DECELERATION    250.0f
-#define VEHICLE_SPAWN_INTERVAL  3.0f    // секунд между спавнами
+#define VEHICLE_SPAWN_INTERVAL  3.0f
 
-// Машина
 typedef struct {
-    float x, y;      // Координаты
-    float speed;     // Текущая скорость (пикселей в секунду)
-    int dirX, dirY;  // Направление (-1, 0, 1)
-    int active;      // Активна ли
-    int canTurn;     // Может ли повернуть
+    float x, y;
+    float speed;
+    int dirX, dirY;
+    int active;
+    int canTurn;
 } Vehicle;
 
 #define MAX_VEHICLES 20
 extern Vehicle vehicles[MAX_VEHICLES];
-extern int currentBrush; // Текущая плитка
+extern int currentBrush;
 
 #endif // COMMON_H
