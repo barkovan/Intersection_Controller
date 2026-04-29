@@ -27,6 +27,7 @@ typedef struct {
 extern GLuint uiButtonTex;        // обычная кнопка
 extern GLuint uiButtonHoverTex;   // кнопка при наведении
 extern GLuint titlePlateTex;      // клякса для заголовка меню
+extern GLuint helpBgTex;          // фоновая клякса для экрана справки
 extern GLuint carTex;             // текстура автомобиля
 
 // Глобальные переменные

@@ -13,10 +13,6 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "../header/stb_image.h"
 
-// ========== ПЕРЕМЕННЫЕ ==========
-
-float hoverPulse = 0.0f;   // для анимации пульсации кнопок
-
 // ========== ЗАГРУЗКА ТЕКСТУР ==========
 
 // Загружает PNG-файл, возвращает ID текстуры OpenGL
@@ -115,8 +111,7 @@ static void drawButton(const Button* btn, int index, int isHovered) {
         glTexCoord2f(0.0f, 1.0f); glVertex2f(btn->x + offsetX, btn->y + offsetY + newH);
         glEnd();
         glDisable(GL_TEXTURE_2D);
-    }
-    else {
+    } else {
         // Запасной вариант – тёмный прямоугольник
         glColor3f(0.18f, 0.18f, 0.18f);
         glBegin(GL_QUADS);
@@ -146,26 +141,23 @@ static void updateButtons(void) {
     if (currentState == STATE_MENU) {
         for (int i = 0; i < 5; i++) {
             int hovered = (mouseX > buttons[i].x && mouseX < buttons[i].x + buttons[i].width &&
-                mouseY > buttons[i].y && mouseY < buttons[i].y + buttons[i].height);
+                           mouseY > buttons[i].y && mouseY < buttons[i].y + buttons[i].height);
             if (hovered) {
                 buttonScale[i] += 0.09f;
                 if (buttonScale[i] > 1.16f) buttonScale[i] = 1.16f;
-            }
-            else {
+            } else {
                 buttonScale[i] -= 0.085f;
                 if (buttonScale[i] < 1.0f) buttonScale[i] = 1.0f;
             }
         }
-    }
-    else if (currentState == STATE_LEVEL_SELECT) {
+    } else if (currentState == STATE_LEVEL_SELECT) {
         for (int i = 0; i < 4; i++) {
             int hovered = (mouseX > levelButtons[i].x && mouseX < levelButtons[i].x + levelButtons[i].width &&
-                mouseY > levelButtons[i].y && mouseY < levelButtons[i].y + levelButtons[i].height);
+                           mouseY > levelButtons[i].y && mouseY < levelButtons[i].y + levelButtons[i].height);
             if (hovered) {
                 buttonScale[i] += 0.09f;
                 if (buttonScale[i] > 1.19f) buttonScale[i] = 1.19f;
-            }
-            else {
+            } else {
                 buttonScale[i] -= 0.085f;
                 if (buttonScale[i] < 1.0f) buttonScale[i] = 1.0f;
             }
@@ -238,23 +230,19 @@ static void drawTile(int x, int y, int type) {
         glVertex2f(fx + 10, fy + 20); glVertex2f(fx + 30, fy + 20);
         glVertex2f(fx + 30, fy + 20); glVertex2f(fx + 25, fy + 15);
         glVertex2f(fx + 30, fy + 20); glVertex2f(fx + 25, fy + 25);
-    }
-    else if (type == TILE_ROAD_LEFT) {
+    } else if (type == TILE_ROAD_LEFT) {
         glVertex2f(fx + 30, fy + 20); glVertex2f(fx + 10, fy + 20);
         glVertex2f(fx + 10, fy + 20); glVertex2f(fx + 15, fy + 15);
         glVertex2f(fx + 10, fy + 20); glVertex2f(fx + 15, fy + 25);
-    }
-    else if (type == TILE_ROAD_UP) {
+    } else if (type == TILE_ROAD_UP) {
         glVertex2f(fx + 20, fy + 30); glVertex2f(fx + 20, fy + 10);
         glVertex2f(fx + 20, fy + 10); glVertex2f(fx + 15, fy + 15);
         glVertex2f(fx + 20, fy + 10); glVertex2f(fx + 25, fy + 15);
-    }
-    else if (type == TILE_ROAD_DOWN) {
+    } else if (type == TILE_ROAD_DOWN) {
         glVertex2f(fx + 20, fy + 10); glVertex2f(fx + 20, fy + 30);
         glVertex2f(fx + 20, fy + 30); glVertex2f(fx + 15, fy + 25);
         glVertex2f(fx + 20, fy + 30); glVertex2f(fx + 25, fy + 25);
-    }
-    else if (type == TILE_INTERSECT) {
+    } else if (type == TILE_INTERSECT) {
         glVertex2f(fx + 15, fy + 20); glVertex2f(fx + 25, fy + 20);
         glVertex2f(fx + 20, fy + 15); glVertex2f(fx + 20, fy + 25);
     }
@@ -303,10 +291,10 @@ bool isDirectionSafe(int gx, int gy, int dx, int dy) {
             continue;
         }
 
-        if (dx == 1 && tile == TILE_ROAD_RIGHT) return true;
+        if (dx == 1  && tile == TILE_ROAD_RIGHT) return true;
         if (dx == -1 && tile == TILE_ROAD_LEFT)  return true;
         if (dy == -1 && tile == TILE_ROAD_UP)    return true;
-        if (dy == 1 && tile == TILE_ROAD_DOWN)  return true;
+        if (dy == 1  && tile == TILE_ROAD_DOWN)  return true;
         if (tile == TILE_SPAWN)                  return true;
         if (tile == TILE_TRAFFIC_LIGHT_GREEN)    return true;
 
@@ -377,8 +365,7 @@ void updateVehicles(float dt) {
         if (v->speed < desiredSpeed) {
             v->speed += VEHICLE_ACCELERATION * dt;
             if (v->speed > desiredSpeed) v->speed = desiredSpeed;
-        }
-        else if (v->speed > desiredSpeed) {
+        } else if (v->speed > desiredSpeed) {
             v->speed -= VEHICLE_DECELERATION * dt;
             if (v->speed < desiredSpeed) v->speed = desiredSpeed;
         }
@@ -432,17 +419,13 @@ void updateVehicles(float dt) {
         int crossedCenter = 0;
         if (v->dirX == 0 && v->dirY == 0) {
             crossedCenter = 1;
-        }
-        else if (v->dirX > 0 && prevX <= centerX && v->x >= centerX) {
+        } else if (v->dirX > 0 && prevX <= centerX && v->x >= centerX) {
             crossedCenter = 1;
-        }
-        else if (v->dirX < 0 && prevX >= centerX && v->x <= centerX) {
+        } else if (v->dirX < 0 && prevX >= centerX && v->x <= centerX) {
             crossedCenter = 1;
-        }
-        else if (v->dirY > 0 && prevY <= centerY && v->y >= centerY) {
+        } else if (v->dirY > 0 && prevY <= centerY && v->y >= centerY) {
             crossedCenter = 1;
-        }
-        else if (v->dirY < 0 && prevY >= centerY && v->y <= centerY) {
+        } else if (v->dirY < 0 && prevY >= centerY && v->y <= centerY) {
             crossedCenter = 1;
         }
 
@@ -451,10 +434,10 @@ void updateVehicles(float dt) {
             v->y = centerY;
 
             // Выбор нового направления в зависимости от типа клетки
-            if (tile == TILE_ROAD_RIGHT) { v->dirX = 1;  v->dirY = 0; }
-            else if (tile == TILE_ROAD_LEFT) { v->dirX = -1; v->dirY = 0; }
-            else if (tile == TILE_ROAD_UP) { v->dirX = 0;  v->dirY = -1; }
-            else if (tile == TILE_ROAD_DOWN) { v->dirX = 0;  v->dirY = 1; }
+            if (tile == TILE_ROAD_RIGHT)      { v->dirX = 1;  v->dirY = 0; }
+            else if (tile == TILE_ROAD_LEFT)  { v->dirX = -1; v->dirY = 0; }
+            else if (tile == TILE_ROAD_UP)    { v->dirX = 0;  v->dirY = -1; }
+            else if (tile == TILE_ROAD_DOWN)  { v->dirX = 0;  v->dirY = 1; }
             else if (tile == TILE_INTERSECT) {
                 if (v->canTurn) {
                     int possibleDirs[4][2] = { {1,0}, {-1,0}, {0,1}, {0,-1} };
@@ -479,8 +462,7 @@ void updateVehicles(float dt) {
                         v->dirY = newDirY;
                     }
                 }
-            }
-            else if (tile == TILE_SPAWN) {
+            } else if (tile == TILE_SPAWN) {
                 int possibleDirs[4][2] = { {1,0}, {-1,0}, {0,1}, {0,-1} };
                 int validIndices[4];
                 int validCount = 0;
@@ -578,8 +560,7 @@ void updateTrafficLights(void) {
                 if (now - trafficLightTimer[y][x] >= YELLOW_DURATION) {
                     if (yellowToGreen[y][x]) {
                         gameMap[y][x] = TILE_TRAFFIC_LIGHT_GREEN;
-                    }
-                    else {
+                    } else {
                         gameMap[y][x] = TILE_TRAFFIC_LIGHT_RED;
                     }
                     trafficLightTimer[y][x] = 0.0;
@@ -629,20 +610,18 @@ void render(void) {
         // Кнопки меню
         for (int i = 0; i < 5; i++) {
             int hovered = (mouseX > buttons[i].x && mouseX < buttons[i].x + buttons[i].width &&
-                mouseY > buttons[i].y && mouseY < buttons[i].y + buttons[i].height);
+                           mouseY > buttons[i].y && mouseY < buttons[i].y + buttons[i].height);
             drawButton(&buttons[i], i, hovered);
         }
-    }
-    else if (currentState == STATE_LEVEL_SELECT) {
+    } else if (currentState == STATE_LEVEL_SELECT) {
         glColor3f(1.0f, 1.0f, 0.3f);
         drawText(fontBaseTitle, GX(2.8f), GY(3), "SELECT DIFFICULTY LEVEL");
         for (int i = 0; i < 4; i++) {
             int hovered = (mouseX > levelButtons[i].x && mouseX < levelButtons[i].x + levelButtons[i].width &&
-                mouseY > levelButtons[i].y && mouseY < levelButtons[i].y + levelButtons[i].height);
+                           mouseY > levelButtons[i].y && mouseY < levelButtons[i].y + levelButtons[i].height);
             drawButton(&levelButtons[i], i, hovered);
         }
-    }
-    else if (currentState == STATE_SIMULATION) {
+    } else if (currentState == STATE_SIMULATION) {
         // Карта
         for (int y = 0; y < MAP_HEIGHT; y++)
             for (int x = 0; x < MAP_WIDTH; x++)
@@ -658,8 +637,7 @@ void render(void) {
             drawText(fontBase, 30, 30, "MODE: MAP EDITOR");
             glColor3f(1.0f, 1.0f, 1.0f);
             drawText(fontBase, 30, 70, "PRESS [SPACE] TO START SIMULATION");
-        }
-        else {
+        } else {
             glColor3f(0.0f, 1.0f, 0.0f);
             drawText(fontBase, 30, 30, "MODE: SIMULATION");
             glColor3f(1.0f, 1.0f, 1.0f);
@@ -685,5 +663,75 @@ void render(void) {
         sprintf(brushText, "BRUSH: %s", typeName);
         glColor3f(1.0f, 1.0f, 1.0f);
         drawText(fontBase, 30, 150, brushText);
+    }
+    else if (currentState == STATE_HELP) {
+        // Фоновая клякса
+        if (helpBgTex != 0) {
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            glEnable(GL_TEXTURE_2D);
+            glBindTexture(GL_TEXTURE_2D, helpBgTex);
+            glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+
+            // Растягиваем на всё окно
+            float bgX = GX(-3);
+            float bgY = GY(-4);
+            float bgW = GX(38);  // 1280px
+            float bgH = GY(25);  // 720px
+
+            glBegin(GL_QUADS);
+            glTexCoord2f(0.0f, 0.0f); glVertex2f(bgX, bgY);
+            glTexCoord2f(1.0f, 0.0f); glVertex2f(bgX + bgW, bgY);
+            glTexCoord2f(1.0f, 1.0f); glVertex2f(bgX + bgW, bgY + bgH);
+            glTexCoord2f(0.0f, 1.0f); glVertex2f(bgX, bgY + bgH);
+            glEnd();
+
+            glDisable(GL_TEXTURE_2D);
+            glDisable(GL_BLEND);
+        }
+
+        float startY = GY(4);
+        float lineHeight = GY(1.2f);
+
+        // Заголовок
+        glColor3f(1.0f, 1.0f, 0.3f);
+        drawText(fontBaseHov, GX(11), GY(2), "HOW TO PLAY");
+
+        // Редактор
+        glColor3f(1.0f, 0.7f, 0.3f);
+        drawText(fontBaseHov, GX(4), startY, "EDITOR MODE:");
+
+        glColor3f(0.9f, 0.9f, 0.9f);
+        drawText(fontBase, GX(4), startY + lineHeight, "1-4 - Select road direction (right/left/up/down)");
+        drawText(fontBase, GX(4), startY + lineHeight * 2, "5 - Select intersection tile");
+        drawText(fontBase, GX(4), startY + lineHeight * 3, "6 - Select traffic light");
+        drawText(fontBase, GX(4), startY + lineHeight * 4, "7 - Select spawn point");
+        drawText(fontBase, GX(4), startY + lineHeight * 5, "LMB - Place selected tile");
+        drawText(fontBase, GX(4), startY + lineHeight * 6, "RMB - Erase tile (place grass)");
+        drawText(fontBase, GX(4), startY + lineHeight * 7, "SPACE - Switch to Simulation mode");
+        drawText(fontBase, GX(4), startY + lineHeight * 8, "F8 - Toggle debug grid");
+
+        // Симуляция
+        float simY = startY + lineHeight * 10;
+        glColor3f(1.0f, 0.7f, 0.3f);
+        drawText(fontBaseHov, GX(4), simY, "SIMULATION MODE:");
+
+        glColor3f(0.9f, 0.9f, 0.9f);
+        drawText(fontBase, GX(4), simY + lineHeight, "LMB on traffic light - Toggle signal");
+        drawText(fontBase, GX(4), simY + lineHeight * 2, "SPACE - Switch to Editor mode");
+        drawText(fontBase, GX(4), simY + lineHeight * 3, "F8 - Toggle debug grid");
+
+        // Общее
+        float generalY = simY + lineHeight * 5;
+        glColor3f(1.0f, 0.7f, 0.3f);
+        drawText(fontBaseHov, GX(4), generalY, "GENERAL:");
+
+        glColor3f(0.9f, 0.9f, 0.9f);
+        drawText(fontBase, GX(4), generalY + lineHeight, "ESC - Return to main menu");
+
+        glDisable(GL_TEXTURE_2D);   // выключаем текстуру
+        glEnable(GL_BLEND);         // включаем блендинг обратно (если был выключен)
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);  // сбрасываем цвет
     }
 }

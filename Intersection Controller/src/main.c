@@ -40,6 +40,7 @@ float buttonScale[10] = { 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
 GLuint uiButtonTex = 0;
 GLuint uiButtonHoverTex = 0;
 GLuint titlePlateTex = 0;
+GLuint helpBgTex = 0;
 GLuint carTex = 0;
 
 // Карта
@@ -117,6 +118,7 @@ int main(int argc, char** argv) {
     uiButtonTex = loadTexture("assets/button_normal.png");
     uiButtonHoverTex = loadTexture("assets/button_hover.png");
     titlePlateTex = loadTexture("assets/title_plate.png");
+    helpBgTex = loadTexture("assets/help_bg.png");
     carTex = loadTexture("assets/car.png");
 
     if (carTex == 0) printf("Error: failed to load car texture\n");
