@@ -93,12 +93,12 @@ void mouse_button_callback(GLFWwindow* w, int button, int action, int mods) {
                         if (tile == TILE_TRAFFIC_LIGHT_GREEN) {
                             gameMap[gridY][gridX] = TILE_TRAFFIC_LIGHT_YELLOW;
                             yellowToGreen[gridY][gridX] = false;
-                            trafficLightTimer[gridY][gridX] = glfwGetTime();
+                            trafficLightTimer[gridY][gridX] = (float)glfwGetTime();
                         }
                         else if (tile == TILE_TRAFFIC_LIGHT_RED) {
                             gameMap[gridY][gridX] = TILE_TRAFFIC_LIGHT_YELLOW;
                             yellowToGreen[gridY][gridX] = true;
-                            trafficLightTimer[gridY][gridX] = glfwGetTime();
+                            trafficLightTimer[gridY][gridX] = (float)glfwGetTime();
                         }
                     }
                 }

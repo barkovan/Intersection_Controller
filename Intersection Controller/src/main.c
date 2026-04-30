@@ -52,6 +52,9 @@ int gameMap[MAP_HEIGHT][MAP_WIDTH] = { 0 };
 Vehicle vehicles[MAX_VEHICLES] = { 0 };
 int currentBrush = TILE_ROAD_RIGHT;
 
+// Таймеры спавнеров
+float spawnTimers[MAP_HEIGHT][MAP_WIDTH] = { 0 };
+
 // Светофоры
 float trafficLightTimer[MAP_HEIGHT][MAP_WIDTH] = { 0.0 };
 bool yellowToGreen[MAP_HEIGHT][MAP_WIDTH] = { false };
