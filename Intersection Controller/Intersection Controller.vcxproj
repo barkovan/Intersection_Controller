@@ -141,6 +141,7 @@
   <ItemGroup>
     <ClCompile Include="GL\GLAD\src\glad.c" />
     <ClCompile Include="src\input.c" />
+    <ClCompile Include="src\levels.c" />
     <ClCompile Include="src\main.c" />
     <ClCompile Include="src\render.c" />
     <ClCompile Include="src\vehicle.c" />
@@ -148,6 +149,7 @@
   <ItemGroup>
     <ClInclude Include="header\common.h" />
     <ClInclude Include="header\input.h" />
+    <ClInclude Include="header\levels.h" />
     <ClInclude Include="header\render.h" />
     <ClInclude Include="header\vehicle.h" />
   </ItemGroup>

@@ -200,6 +200,9 @@ static void drawTile(int x, int y, int type) {
     float fx = (float)GX(x);
     float fy = (float)GY(y);
 
+    // Сетку убираем, оставляем только для sandbox
+    int offset = (currentLevel == 0) ? 1 : 0;
+
     // Цвет фона клетки
     switch (type) {
     case TILE_GRASS:                   glColor3f(0.1f, 0.4f, 0.1f); break;
@@ -216,10 +219,10 @@ static void drawTile(int x, int y, int type) {
     }
 
     glBegin(GL_QUADS);
-    glVertex2f(fx + 1, fy + 1);
-    glVertex2f(fx + 39, fy + 1);
-    glVertex2f(fx + 39, fy + 39);
-    glVertex2f(fx + 1, fy + 39);
+    glVertex2f(fx + offset, fy + offset);
+    glVertex2f(fx + GRID_SIZE - offset, fy + offset);
+    glVertex2f(fx + GRID_SIZE - offset, fy + GRID_SIZE - offset);
+    glVertex2f(fx + offset, fy + GRID_SIZE - offset);
     glEnd();
 
     // Стрелки направления на дорогах
@@ -340,6 +343,13 @@ void updateTrafficLights(void) {
 void render(void) {
     glClearColor(0.08f, 0.15f, 0.10f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
+
+    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glDisable(GL_TEXTURE_2D);
 
     if (showDebugGrid) drawDebugGrid();
 

@@ -1,5 +1,6 @@
 #include "../header/common.h"
 #include "../header/input.h"
+#include "../header/levels.h"
 #include <stdio.h>
 
 void initButtons(void) {
@@ -62,6 +63,9 @@ void mouse_button_callback(GLFWwindow* w, int button, int action, int mods) {
                 else {
                     currentLevel = 0;       // песочница
                 }
+
+                loadLevel(currentLevel);
+
                 currentState = STATE_SIMULATION;
                 return;
             }
