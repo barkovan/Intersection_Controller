@@ -29,6 +29,9 @@ extern GLuint uiButtonHoverTex;   // кнопка при наведении
 extern GLuint titlePlateTex;      // клякса для заголовка меню
 extern GLuint helpBgTex;          // фоновая клякса для экрана справки
 extern GLuint carTex;             // текстура автомобиля
+extern GLuint houseTex;           // текстура дома
+extern GLuint treeTex;            // текстура дерева
+
 
 // Глобальные переменные
 extern GameState currentState;
@@ -71,7 +74,10 @@ typedef enum {
     TILE_TRAFFIC_LIGHT_YELLOW,
     TILE_TRAFFIC_LIGHT_RED,
     TILE_INTERSECT,
-    TILE_SPAWN
+    TILE_SPAWN,
+    TILE_HOUSE,
+    TILE_TREE,
+    TILE_SIDEWALK
 } TileType;
 
 extern int gameMap[MAP_HEIGHT][MAP_WIDTH];

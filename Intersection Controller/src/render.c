@@ -205,7 +205,7 @@ static void drawTile(int x, int y, int type) {
 
     // Цвет фона клетки
     switch (type) {
-    case TILE_GRASS:                   glColor3f(0.1f, 0.4f, 0.1f); break;
+    case TILE_GRASS:                   glColor3f(0.28f, 0.46f, 0.28f); break;
     case TILE_ROAD_RIGHT:
     case TILE_ROAD_LEFT:
     case TILE_ROAD_UP:
@@ -215,6 +215,9 @@ static void drawTile(int x, int y, int type) {
     case TILE_TRAFFIC_LIGHT_YELLOW:    glColor3f(0.4f, 0.4f, 0.2f); break;
     case TILE_TRAFFIC_LIGHT_RED:       glColor3f(0.4f, 0.3f, 0.3f); break;
     case TILE_SPAWN:                   glColor3f(0.1f, 0.1f, 0.1f); break;
+    case TILE_HOUSE:
+    case TILE_TREE:
+    case TILE_SIDEWALK:                glColor3f(0.55f, 0.55f, 0.55f); break;
     default:                           glColor3f(0.0f, 0.0f, 0.0f);
     }
 
@@ -224,6 +227,36 @@ static void drawTile(int x, int y, int type) {
     glVertex2f(fx + GRID_SIZE - offset, fy + GRID_SIZE - offset);
     glVertex2f(fx + offset, fy + GRID_SIZE - offset);
     glEnd();
+
+    // отрисовка текстур
+    if (type == TILE_HOUSE || type == TILE_TREE) {
+        GLuint currentTex = (type == TILE_HOUSE) ? houseTex : treeTex;
+
+        float multiplier = (type == TILE_HOUSE) ? 10.5f : 3.0f;
+        float drawSize = GRID_SIZE * multiplier; // Новая ширина и высота
+
+        float hOffset = (drawSize - GRID_SIZE) / 2.0f;
+
+        glEnable(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, currentTex);
+        glColor4f(1.0f, 1.0f, 1.0f, 1.0f); // Сброс цвета
+
+        glBegin(GL_QUADS);
+        glTexCoord2f(0.0f, 0.0f);
+        glVertex2f(fx - hOffset, fy - (drawSize - GRID_SIZE));
+
+        glTexCoord2f(1.0f, 0.0f);
+        glVertex2f(fx + GRID_SIZE + hOffset, fy - (drawSize - GRID_SIZE));
+
+        glTexCoord2f(1.0f, 1.0f);
+        glVertex2f(fx + GRID_SIZE + hOffset, fy + GRID_SIZE);
+
+        glTexCoord2f(0.0f, 1.0f);
+        glVertex2f(fx - hOffset, fy + GRID_SIZE);
+        glEnd();
+
+        glDisable(GL_TEXTURE_2D);
+    }
 
     // Стрелки направления на дорогах
     glColor3f(0.5f, 0.5f, 0.5f);

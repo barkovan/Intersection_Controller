@@ -43,6 +43,9 @@ GLuint uiButtonHoverTex = 0;
 GLuint titlePlateTex = 0;
 GLuint helpBgTex = 0;
 GLuint carTex = 0;
+GLuint houseTex = 0;
+GLuint treeTex = 0;
+
 
 // Карта
 int gameMap[MAP_HEIGHT][MAP_WIDTH] = { 0 };
@@ -121,6 +124,8 @@ int main(int argc, char** argv) {
     titlePlateTex = loadTexture("assets/title_plate.png");
     helpBgTex = loadTexture("assets/help_bg.png");
     carTex = loadTexture("assets/car.png");
+    houseTex = loadTexture("assets/house.png");
+    treeTex = loadTexture("assets/tree.png");
 
     if (carTex == 0) printf("Error: failed to load car texture\n");
 
