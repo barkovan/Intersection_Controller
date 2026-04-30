@@ -27,6 +27,9 @@
     <ClCompile Include="src\render.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\vehicle.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="header\common.h">
@@ -38,7 +41,7 @@
     <ClInclude Include="header\render.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\Downloads\stb_image.h">
+    <ClInclude Include="header\vehicle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

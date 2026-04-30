@@ -8,6 +8,7 @@
 #include "../header/common.h"
 #include "../header/render.h"
 #include "../header/input.h"
+#include "../header/vehicle.h"
 
 #include <stdio.h>
 #include <stdlib.h>

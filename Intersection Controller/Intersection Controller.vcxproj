@@ -143,12 +143,13 @@
     <ClCompile Include="src\input.c" />
     <ClCompile Include="src\main.c" />
     <ClCompile Include="src\render.c" />
+    <ClCompile Include="src\vehicle.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\Downloads\stb_image.h" />
     <ClInclude Include="header\common.h" />
     <ClInclude Include="header\input.h" />
     <ClInclude Include="header\render.h" />
+    <ClInclude Include="header\vehicle.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

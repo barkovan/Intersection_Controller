@@ -4,6 +4,9 @@
 #include <glad/glad.h>
 #include "common.h"
 
+// Загрузка PNG-файла
+GLuint loadTexture(const char* filename);
+
 // Шрифты
 void buildTitleFont(void);
 void buildBaseFont(void);
@@ -12,10 +15,7 @@ void buildBaseFontHov(void);
 // Отрисовка
 void drawText(GLuint fontBase, float x, float y, const char* text);
 void render(void);
-
-// Логика машин
-void updateVehicles(float dt);
-void spawnLogic(float dt);
+void drawVehicle(Vehicle* v);
 
 void updateTrafficLights(void);
 
