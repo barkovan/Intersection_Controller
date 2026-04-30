@@ -58,8 +58,13 @@ extern int showDebugGrid;
 // Карта
 #define MAP_WIDTH 32
 #define MAP_HEIGHT 18
+extern int gameMap[MAP_HEIGHT][MAP_WIDTH];
+
+extern int currentBrush; // текущая плитка
 
 #define YELLOW_DURATION 1.0   // длительность жёлтого сигнала (сек)
+
+extern float spawnTimers[MAP_HEIGHT][MAP_WIDTH]; // таймеры спавнеров
 
 typedef enum {
     TILE_GRASS = 0,
@@ -73,8 +78,6 @@ typedef enum {
     TILE_INTERSECT,
     TILE_SPAWN
 } TileType;
-
-extern int gameMap[MAP_HEIGHT][MAP_WIDTH];
 
 // Светофоры
 extern float trafficLightTimer[MAP_HEIGHT][MAP_WIDTH];
@@ -96,6 +99,5 @@ typedef struct {
 
 #define MAX_VEHICLES 20
 extern Vehicle vehicles[MAX_VEHICLES];
-extern int currentBrush;
 
 #endif // COMMON_H
