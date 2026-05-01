@@ -52,6 +52,7 @@ GLuint treeTex = 0;
 GLuint treeOrangeTex = 0;
 GLuint treeGreenTex = 0;
 GLuint treeRedTex = 0;
+GLuint treeBlackgreenTex = 0;
 
 // Карта
 int gameMap[MAP_HEIGHT][MAP_WIDTH] = { 0 };
@@ -157,6 +158,7 @@ int main(int argc, char** argv) {
     treeOrangeTex = loadTexture("assets/tree_orange.png");
     treeGreenTex = loadTexture("assets/tree_green.png");
     treeRedTex = loadTexture("assets/tree_red.png");
+    treeBlackgreenTex = loadTexture("assets/tree_blackgreen.png");
 
     if (carTex == 0) printf("Error: failed to load car texture\n");
 

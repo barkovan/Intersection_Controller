@@ -45,11 +45,14 @@ void loadLevel(int levelId) {
 
         // текстурки
         gameMap[3][5] = TILE_HOUSE;
-        gameMap[3][13] = TILE_TREE_ORANGE;
-        gameMap[3][16] = TILE_TREE;
-        gameMap[3][20] = TILE_TREE_GREEN;
-        gameMap[3][25] = TILE_TREE_RED;
-        gameMap[14][5] = TILE_HOUSE_BROWN;
+        gameMap[3][12] = TILE_HOUSE_BROWN;
+        gameMap[4][8] = TILE_TREE;
+        gameMap[11][18] = TILE_TREE_ORANGE;
+        gameMap[6][18] = TILE_TREE_ORANGE;
+        gameMap[6][2] = TILE_TREE;
+        gameMap[6][25] = TILE_TREE;
+        gameMap[14][13] = TILE_TREE;
+        gameMap[3][20] = TILE_TREE_BLACKGREEN;
     }
     else if (levelId == 2) { //medium
         // Создаем одну горизонтальную дорогу

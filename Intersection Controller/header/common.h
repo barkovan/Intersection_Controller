@@ -40,6 +40,7 @@ extern GLuint treeTex;            // текстура дерева
 extern GLuint treeOrangeTex;
 extern GLuint treeGreenTex;
 extern GLuint treeRedTex;
+extern GLuint treeBlackgreenTex;
 
 // Глобальные переменные
 extern GameState currentState;
@@ -94,6 +95,7 @@ typedef enum {
     TILE_TREE_ORANGE,
     TILE_TREE_GREEN,
     TILE_TREE_RED,
+    TILE_TREE_BLACKGREEN,
     TILE_SIDEWALK
 } TileType;
 

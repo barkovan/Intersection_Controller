@@ -202,7 +202,7 @@ static void drawTile(int x, int y, int type) {
 
     int offset = (currentLevel == 0) ? 1 : 0;
 
-    if (type == TILE_HOUSE || type == TILE_HOUSE_BROWN || type == TILE_TREE || type == TILE_TREE_ORANGE || type == TILE_TREE_GREEN || type == TILE_TREE_RED) {
+    if (type == TILE_HOUSE || type == TILE_HOUSE_BROWN || type == TILE_TREE || type == TILE_TREE_ORANGE || type == TILE_TREE_GREEN || type == TILE_TREE_RED || type == TILE_TREE_BLACKGREEN) {
         
         GLuint currentTex;
         float multiplier;
@@ -231,6 +231,10 @@ static void drawTile(int x, int y, int type) {
         case TILE_TREE_RED:
             currentTex = treeRedTex;
             multiplier = 3.0f;
+            break;
+        case TILE_TREE_BLACKGREEN:
+            currentTex = treeBlackgreenTex;
+            multiplier = 2.0f;
             break;
         default:
             currentTex = houseTex;
@@ -468,7 +472,7 @@ void render(void) {
         for (int y = 0; y < MAP_HEIGHT; y++) {
             for (int x = 0; x < MAP_WIDTH; x++) {
                 int tile = gameMap[y][x];
-                if (tile == TILE_HOUSE || tile == TILE_HOUSE_BROWN || tile == TILE_TREE || tile == TILE_TREE_ORANGE || tile == TILE_TREE_GREEN || tile == TILE_TREE_RED) {
+                if (tile == TILE_HOUSE || tile == TILE_HOUSE_BROWN || tile == TILE_TREE || tile == TILE_TREE_ORANGE || tile == TILE_TREE_GREEN || tile == TILE_TREE_RED || tile == TILE_TREE_BLACKGREEN) {
                     drawTile(x, y, TILE_GRASS);
                 }
                 else {
@@ -486,7 +490,7 @@ void render(void) {
         for (int y = 0; y < MAP_HEIGHT; y++) {
             for (int x = 0; x < MAP_WIDTH; x++) {
                 int tile = gameMap[y][x];
-                if (tile == TILE_HOUSE || tile == TILE_HOUSE_BROWN || tile == TILE_TREE || tile == TILE_TREE_ORANGE || tile == TILE_TREE_GREEN || tile == TILE_TREE_RED) {
+                if (tile == TILE_HOUSE || tile == TILE_HOUSE_BROWN || tile == TILE_TREE || tile == TILE_TREE_ORANGE || tile == TILE_TREE_GREEN || tile == TILE_TREE_RED || tile == TILE_TREE_BLACKGREEN) {
                     drawTile(x, y, tile);
                 }
             }
