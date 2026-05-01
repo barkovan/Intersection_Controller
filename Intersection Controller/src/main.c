@@ -123,6 +123,22 @@ int main(int argc, char** argv) {
         return -1;
     }
 
+    // Шрифты
+    buildTitleFont();
+    buildBaseFont();
+    buildBaseFontHov();
+
+    // Начальная настройка проекции
+    framebuffer_size_callback(window, wWidth, wHeight);
+
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // Черный фон
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    // Окно загрузки
+    drawText(fontBaseTitle, 460.0f, 360.0f, "LOADING...");
+    glfwSwapBuffers(window);
+    glFinish();
+
     // Включаем поддержку прозрачности
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -134,26 +150,17 @@ int main(int argc, char** argv) {
     helpBgTex = loadTexture("assets/help_bg.png");
     carTex = loadTexture("assets/car.png");
 
-
     houseTex = loadTexture("assets/house.png");
     houseBrownTex = loadTexture("assets/house_brown.png");
-
 
     treeTex = loadTexture("assets/tree.png");
     treeOrangeTex = loadTexture("assets/tree_orange.png");
     treeGreenTex = loadTexture("assets/tree_green.png");
     treeRedTex = loadTexture("assets/tree_red.png");
 
-
     if (carTex == 0) printf("Error: failed to load car texture\n");
 
-    // Начальная настройка проекции
-    framebuffer_size_callback(window, wWidth, wHeight);
-
-    // Шрифты и кнопки
-    buildTitleFont();
-    buildBaseFont();
-    buildBaseFontHov();
+    // Кнопки
     initButtons();
 
     // Колбэки ввода
