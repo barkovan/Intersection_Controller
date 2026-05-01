@@ -36,7 +36,7 @@ bool isDirectionSafe(int gx, int gy, int dx, int dy) {
 // Обновляет положение и скорость всех машин
 void updateVehicles(float dt) {
     // Настраиваем габариты машины (в пикселях)
-    float carLength = 60.0f;     // Полная длина с запасом (для расчёта ДТП и дистанции)
+    float carLength = 55.0f;     // Полная длина (для расчёта ДТП и дистанции)
     float halfCarLength = carLength / 2; // От центра до бампера (чтобы капот не торчал на перекрестке)
 
     for (int i = 0; i < MAX_VEHICLES; i++) {
@@ -108,8 +108,8 @@ void updateVehicles(float dt) {
                 (v->dirY > 0 && dy > 0 && fabsf(dx) < 15.0f) ||
                 (v->dirY < 0 && dy < 0 && fabsf(dx) < 15.0f)) {
 
-                // Вычитаем длину машины и оставляем зазор 5 пикселей
-                float dist = sqrtf(dx * dx + dy * dy) - carLength - 5.0f;
+                // Вычитаем длину машины
+                float dist = sqrtf(dx * dx + dy * dy) - carLength;
                 if (dist < distToCar) distToCar = (dist > 0.0f) ? dist : 0.0f;
             }
         }
@@ -123,7 +123,7 @@ void updateVehicles(float dt) {
 
         // Плавное торможение, если препятствие близко
         if (obstacleDist < 200.0f) {
-            float maxSafe = sqrtf(2.0f * VEHICLE_DECELERATION * obstacleDist);
+            float maxSafe = sqrtf(VEHICLE_DECELERATION * obstacleDist);
             if (maxSafe < desiredSpeed) desiredSpeed = maxSafe;
         }
         if (obstacleDist <= 1.0f) desiredSpeed = 0.0f;
@@ -138,25 +138,7 @@ void updateVehicles(float dt) {
             if (v->speed < desiredSpeed) v->speed = desiredSpeed;
         }
 
-        // 5. АВАРИИ
-        for (int j = 0; j < MAX_VEHICLES; j++) {
-            if (i == j || !vehicles[j].active) continue;
-            Vehicle* other = &vehicles[j];
-
-            float dx = other->x - v->x;
-            float dy = other->y - v->y;
-            float centerDist = sqrtf(dx * dx + dy * dy);
-
-            if (centerDist < carLength * 0.6f) {
-                if (v->speed > 10.0f || other->speed > 10.0f) {
-                    other->active = 0;
-                    v->active = 0;
-                    break;
-                }
-            }
-        }
-
-        // 6. ДВИЖЕНИЕ
+        // 5. ДВИЖЕНИЕ
         float move = v->speed * dt;
         float prevX = v->x, prevY = v->y;
         v->x += v->dirX * move;
@@ -172,6 +154,36 @@ void updateVehicles(float dt) {
         if (gameMap[gy][gx] == TILE_GRASS) {
             v->active = 0;
             continue;
+        }
+
+
+        // 6. АВАРИИ
+        for (int j = 0; j < MAX_VEHICLES; j++) {
+            if (i == j || !vehicles[j].active) continue;
+            Vehicle* other = &vehicles[j];
+
+            float dx = other->x - v->x;
+            float dy = other->y - v->y;
+            float centerDist = sqrtf(dx * dx + dy * dy);
+
+            int needBeChecked = 0;
+            if ((abs(v->dirX) == abs(other->dirX) && v->y == other->y) || (abs(v->dirY) == abs(other->dirY) && v->x == other->x)) {
+                needBeChecked = 1; // Первый случай: машины едут друг за другом или навстречу друг другу
+            }
+            else if (abs(v->dirX) != abs(other->dirX) || abs(v->dirY) != abs(other->dirY)) {
+                needBeChecked = 2; // Второй случай: машина едет сбоку от другой
+            }
+
+            if (needBeChecked == 1 && centerDist < carLength) {
+                other->active = 0;
+                v->active = 0;
+                break;
+            }
+            else if (needBeChecked == 2 && centerDist < carLength * 3/4) {
+                other->active = 0;
+                v->active = 0;
+                break;
+            }
         }
 
         // 7. ЛОГИКА ЦЕНТРИРОВАНИЯ И ПОВОРОТОВ
@@ -218,8 +230,8 @@ void updateVehicles(float dt) {
                     if (validCount > 0) {
                         int choiceIndex = -1;
 
-                        // Проверка на шанс, что машина поедет прямо, если это возможно
-                        if (straightIndex != -1 && (rand() % 100 < 70)) {
+                        // Машина поедет прямо, если это возможно
+                        if (straightIndex != -1) {
                             choiceIndex = validIndices[straightIndex];
                         }
                         else {

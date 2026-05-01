@@ -296,6 +296,46 @@ static void drawTile(int x, int y, int type) {
     glVertex2f(fx + offset, fy + GRID_SIZE - offset);
     glEnd();
 
+    // Отрисовка разметки
+
+    // Настраиваем толщину и цвет линий
+    glLineWidth(2.0f);
+    glColor3f(1.0f, 1.0f, 1.0f); // Белый цвет разметки
+
+    // 1. Горизонтальные дороги (проверяем клетку СНИЗУ)
+    if (type == TILE_ROAD_RIGHT || type == TILE_ROAD_LEFT || type == TILE_SPAWN || (type >= 5 && type <= 7) || type == TILE_INTERSECT) {
+        if (y + 1 < MAP_HEIGHT) {
+            int tileBelow = gameMap[y + 1][x];
+            if (tileBelow == TILE_ROAD_RIGHT || tileBelow == TILE_ROAD_LEFT || tileBelow == TILE_SPAWN || ((tileBelow >= 5 && tileBelow <= 7) && type != TILE_INTERSECT)) {
+
+                if (type != tileBelow) {
+                    glBegin(GL_LINES);
+                    glVertex2f(fx, fy + GRID_SIZE);
+                    glVertex2f(fx + GRID_SIZE, fy + GRID_SIZE);
+                    glEnd();
+                }
+
+            }
+        }
+    }
+
+    // 2. Вертикальные дороги (проверяем клетку СПРАВА)
+    if (type == TILE_ROAD_UP || type == TILE_ROAD_DOWN || type == TILE_SPAWN || (type >= 5 && type <= 7) || type == TILE_INTERSECT) {
+        if (x + 1 < MAP_WIDTH) {
+            int tileRight = gameMap[y][x + 1];
+            if (tileRight == TILE_ROAD_UP || tileRight == TILE_ROAD_DOWN || tileRight == TILE_SPAWN || ((tileRight >= 5 && tileRight <= 7) && type != TILE_INTERSECT)) {
+
+                if (type != tileRight) {
+                    glBegin(GL_LINES);
+                    glVertex2f(fx + GRID_SIZE, fy);
+                    glVertex2f(fx + GRID_SIZE, fy + GRID_SIZE);
+                    glEnd();
+                }
+
+            }
+        }
+    }
+
     // Стрелки направления на дорогах
     if (isPauseMode) {
         glColor3f(0.5f, 0.5f, 0.5f);

@@ -85,7 +85,7 @@ void loadLevel(int levelId) {
         gameMap[0][15] = TILE_SPAWN; // Машины сверху вниз
     }
     else if (levelId == 3) { // hard
-        // Главная горизонтальная дорога
+        // 1. Главная горизонтальная дорога (на всю ширину)
         for (int x = 0; x < MAP_WIDTH; x++) {
             gameMap[9][x] = TILE_ROAD_RIGHT;
             gameMap[8][x] = TILE_ROAD_LEFT;
@@ -93,37 +93,46 @@ void loadLevel(int levelId) {
             gameMap[7][x] = TILE_SIDEWALK;
         }
 
-        // Две пересекающие вертикальные дороги
+        // 2. Первая (левая) вертикальная дорога — ПОЛНЫЙ ПЕРЕКРЕСТОК
         for (int y = 0; y < MAP_HEIGHT; y++) {
-            // Первая (левая) вертикальная дорога
             gameMap[y][11] = TILE_ROAD_UP;
             gameMap[y][10] = TILE_ROAD_DOWN;
-            if (gameMap[y][12] != TILE_ROAD_RIGHT && gameMap[y][12] != TILE_ROAD_LEFT) gameMap[y][12] = TILE_SIDEWALK;
-            if (gameMap[y][9] != TILE_ROAD_RIGHT && gameMap[y][9] != TILE_ROAD_LEFT) gameMap[y][9] = TILE_SIDEWALK;
-
-            // Вторая (правая) вертикальная дорога
-            gameMap[y][23] = TILE_ROAD_UP;
-            gameMap[y][22] = TILE_ROAD_DOWN;
-            if (gameMap[y][24] != TILE_ROAD_RIGHT && gameMap[y][24] != TILE_ROAD_LEFT) gameMap[y][24] = TILE_SIDEWALK;
-            if (gameMap[y][21] != TILE_ROAD_RIGHT && gameMap[y][21] != TILE_ROAD_LEFT) gameMap[y][21] = TILE_SIDEWALK;
+            // Отрисовка боковых тротуаров (только там, где нет горизонтальной дороги)
+            if (y < 8 || y > 9) {
+                gameMap[y][12] = TILE_SIDEWALK;
+                gameMap[y][9] = TILE_SIDEWALK;
+            }
         }
 
-        // Зоны перекрестков
-        // Левый перекресток
+        // 3. Вторая (правая) вертикальная дорога — Т-ОБРАЗНЫЙ (только СВЕРХУ)
+        // Рисуем дорогу только до уровня y = 7 (выше основной трассы)
+        for (int y = 0; y <= 7; y++) {
+            gameMap[y][23] = TILE_ROAD_UP;
+            gameMap[y][22] = TILE_ROAD_DOWN;
+            gameMap[y][24] = TILE_SIDEWALK;
+            gameMap[y][21] = TILE_SIDEWALK;
+        }
+        // "Заглушаем" дорогу снизу тротуаром, чтобы получился Т-образный стык
+        gameMap[10][22] = TILE_SIDEWALK;
+        gameMap[10][23] = TILE_SIDEWALK;
+
+        // 4. Зоны перекрестков
+        // Левый (4-х сторонний)
         gameMap[8][10] = TILE_INTERSECT; gameMap[8][11] = TILE_INTERSECT;
         gameMap[9][10] = TILE_INTERSECT; gameMap[9][11] = TILE_INTERSECT;
-        // Правый перекресток
+
+        // Правый (Т-образный)
         gameMap[8][22] = TILE_INTERSECT; gameMap[8][23] = TILE_INTERSECT;
         gameMap[9][22] = TILE_INTERSECT; gameMap[9][23] = TILE_INTERSECT;
 
-        // Два светофора
-        gameMap[9][9] = TILE_TRAFFIC_LIGHT_GREEN; // Перед левым перекрестком (движение направо)
-        gameMap[8][24] = TILE_TRAFFIC_LIGHT_RED;   // Перед правым перекрестком (движение налево)
+        // 5. Светофоры
+        gameMap[9][9] = TILE_TRAFFIC_LIGHT_GREEN; // Перед левым перекрестком
+        gameMap[8][24] = TILE_TRAFFIC_LIGHT_RED;  // Перед правым (на основном пути)
 
-        // Четыре спавнера
-        gameMap[9][0] = TILE_SPAWN; // Левый край
-        gameMap[8][31] = TILE_SPAWN; // Правый край
-        gameMap[17][11] = TILE_SPAWN; // Низ 1-й дороги
-        gameMap[0][22] = TILE_SPAWN; // Верх 2-й дороги
+        // 6. Спавнеры (точки появления машин)
+        gameMap[9][0] = TILE_SPAWN;      // Въезд слева
+        gameMap[8][31] = TILE_SPAWN;     // Въезд справа
+        gameMap[17][11] = TILE_SPAWN;    // Въезд снизу (только для левой дороги)
+        gameMap[0][22] = TILE_SPAWN;     // Въезд сверху (для обеих дорог)
     }
 }

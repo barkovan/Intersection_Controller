@@ -106,7 +106,7 @@ extern bool  yellowToGreen[MAP_HEIGHT][MAP_WIDTH];
 // Физика автомобилей
 #define VEHICLE_MAX_SPEED       120.0f
 #define VEHICLE_ACCELERATION    200.0f
-#define VEHICLE_DECELERATION    250.0f
+#define VEHICLE_DECELERATION    300.0f
 #define VEHICLE_SPAWN_INTERVAL  3.0f
 
 typedef struct {
