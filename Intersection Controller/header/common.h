@@ -23,15 +23,23 @@ typedef struct {
     const char* type;   // "Menu" или "Level"
 } Button;
 
+
 // Общие текстуры
 extern GLuint uiButtonTex;        // обычная кнопка
 extern GLuint uiButtonHoverTex;   // кнопка при наведении
 extern GLuint titlePlateTex;      // клякса для заголовка меню
 extern GLuint helpBgTex;          // фоновая клякса для экрана справки
 extern GLuint carTex;             // текстура автомобиля
-extern GLuint houseTex;           // текстура дома
-extern GLuint treeTex;            // текстура дерева
 
+
+extern GLuint houseTex;           // текстура дома
+extern GLuint houseBrownTex;
+
+
+extern GLuint treeTex;            // текстура дерева
+extern GLuint treeOrangeTex;
+extern GLuint treeGreenTex;
+extern GLuint treeRedTex;
 
 // Глобальные переменные
 extern GameState currentState;
@@ -81,7 +89,11 @@ typedef enum {
     TILE_INTERSECT,
     TILE_SPAWN,
     TILE_HOUSE,
+    TILE_HOUSE_BROWN,
     TILE_TREE,
+    TILE_TREE_ORANGE,
+    TILE_TREE_GREEN,
+    TILE_TREE_RED,
     TILE_SIDEWALK
 } TileType;
 

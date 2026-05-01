@@ -200,10 +200,76 @@ static void drawTile(int x, int y, int type) {
     float fx = (float)GX(x);
     float fy = (float)GY(y);
 
-    // Сетку убираем, оставляем только для sandbox
     int offset = (currentLevel == 0) ? 1 : 0;
 
-    // Цвет фона клетки
+    if (type == TILE_HOUSE || type == TILE_HOUSE_BROWN || type == TILE_TREE || type == TILE_TREE_ORANGE || type == TILE_TREE_GREEN || type == TILE_TREE_RED) {
+        
+        GLuint currentTex;
+        float multiplier;
+
+        switch (type) {
+        case TILE_HOUSE:
+            currentTex = houseTex;
+            multiplier = 11.8f;
+            break;
+        case TILE_HOUSE_BROWN:
+            multiplier = 10.0f;
+            currentTex = houseBrownTex;
+            break;
+        case TILE_TREE:
+            currentTex = treeTex;
+            multiplier = 3.0f;
+            break;
+        case TILE_TREE_ORANGE:
+            currentTex = treeOrangeTex;
+            multiplier = 4.5f;
+            break;
+        case TILE_TREE_GREEN:
+            currentTex = treeGreenTex;
+            multiplier = 4.5f;
+            break;
+        case TILE_TREE_RED:
+            currentTex = treeRedTex;
+            multiplier = 3.0f;
+            break;
+        default:
+            currentTex = houseTex;
+            multiplier = 1.0f;
+            break;
+        }
+
+        float drawSize = GRID_SIZE * multiplier;
+        float hOffset = (drawSize - GRID_SIZE) / 2.0f;
+        float vOffset = (drawSize - GRID_SIZE) / 2.0f;
+
+        glEnable(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, currentTex);
+        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+
+        glBegin(GL_QUADS);
+        // Левый верхний угол (отступаем вверх и влево)
+        glTexCoord2f(0.0f, 0.0f);
+        glVertex2f(fx - hOffset, fy - vOffset);
+
+        // Правый верхний угол (отступаем вверх и вправо)
+        glTexCoord2f(1.0f, 0.0f);
+        glVertex2f(fx + GRID_SIZE + hOffset, fy - vOffset);
+
+        // Правый нижний угол (отступаем вниз и вправо)
+        glTexCoord2f(1.0f, 1.0f);
+        glVertex2f(fx + GRID_SIZE + hOffset, fy + GRID_SIZE + vOffset);
+
+        // Левый нижний угол (отступаем вниз и влево)
+        glTexCoord2f(0.0f, 1.0f);
+        glVertex2f(fx - hOffset, fy + GRID_SIZE + vOffset);
+        glEnd();
+
+        glDisable(GL_TEXTURE_2D);
+
+        return;
+    }
+
+    // отрисовка
     switch (type) {
     case TILE_GRASS:                   glColor3f(0.28f, 0.46f, 0.28f); break;
     case TILE_ROAD_RIGHT:
@@ -215,8 +281,6 @@ static void drawTile(int x, int y, int type) {
     case TILE_TRAFFIC_LIGHT_YELLOW:    glColor3f(0.4f, 0.4f, 0.2f); break;
     case TILE_TRAFFIC_LIGHT_RED:       glColor3f(0.4f, 0.3f, 0.3f); break;
     case TILE_SPAWN:                   glColor3f(0.1f, 0.1f, 0.1f); break;
-    case TILE_HOUSE:
-    case TILE_TREE:
     case TILE_SIDEWALK:                glColor3f(0.55f, 0.55f, 0.55f); break;
     default:                           glColor3f(0.0f, 0.0f, 0.0f);
     }
@@ -228,36 +292,6 @@ static void drawTile(int x, int y, int type) {
     glVertex2f(fx + offset, fy + GRID_SIZE - offset);
     glEnd();
 
-    // отрисовка текстур
-    if (type == TILE_HOUSE || type == TILE_TREE) {
-        GLuint currentTex = (type == TILE_HOUSE) ? houseTex : treeTex;
-
-        float multiplier = (type == TILE_HOUSE) ? 10.5f : 3.0f;
-        float drawSize = GRID_SIZE * multiplier; // Новая ширина и высота
-
-        float hOffset = (drawSize - GRID_SIZE) / 2.0f;
-
-        glEnable(GL_TEXTURE_2D);
-        glBindTexture(GL_TEXTURE_2D, currentTex);
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f); // Сброс цвета
-
-        glBegin(GL_QUADS);
-        glTexCoord2f(0.0f, 0.0f);
-        glVertex2f(fx - hOffset, fy - (drawSize - GRID_SIZE));
-
-        glTexCoord2f(1.0f, 0.0f);
-        glVertex2f(fx + GRID_SIZE + hOffset, fy - (drawSize - GRID_SIZE));
-
-        glTexCoord2f(1.0f, 1.0f);
-        glVertex2f(fx + GRID_SIZE + hOffset, fy + GRID_SIZE);
-
-        glTexCoord2f(0.0f, 1.0f);
-        glVertex2f(fx - hOffset, fy + GRID_SIZE);
-        glEnd();
-
-        glDisable(GL_TEXTURE_2D);
-    }
-
     // Стрелки направления на дорогах
     glColor3f(0.5f, 0.5f, 0.5f);
     glLineWidth(2.0f);
@@ -266,25 +300,29 @@ static void drawTile(int x, int y, int type) {
         glVertex2f(fx + 10, fy + 20); glVertex2f(fx + 30, fy + 20);
         glVertex2f(fx + 30, fy + 20); glVertex2f(fx + 25, fy + 15);
         glVertex2f(fx + 30, fy + 20); glVertex2f(fx + 25, fy + 25);
-    } else if (type == TILE_ROAD_LEFT) {
+    }
+    else if (type == TILE_ROAD_LEFT) {
         glVertex2f(fx + 30, fy + 20); glVertex2f(fx + 10, fy + 20);
         glVertex2f(fx + 10, fy + 20); glVertex2f(fx + 15, fy + 15);
         glVertex2f(fx + 10, fy + 20); glVertex2f(fx + 15, fy + 25);
-    } else if (type == TILE_ROAD_UP) {
+    }
+    else if (type == TILE_ROAD_UP) {
         glVertex2f(fx + 20, fy + 30); glVertex2f(fx + 20, fy + 10);
         glVertex2f(fx + 20, fy + 10); glVertex2f(fx + 15, fy + 15);
         glVertex2f(fx + 20, fy + 10); glVertex2f(fx + 25, fy + 15);
-    } else if (type == TILE_ROAD_DOWN) {
+    }
+    else if (type == TILE_ROAD_DOWN) {
         glVertex2f(fx + 20, fy + 10); glVertex2f(fx + 20, fy + 30);
         glVertex2f(fx + 20, fy + 30); glVertex2f(fx + 15, fy + 25);
         glVertex2f(fx + 20, fy + 30); glVertex2f(fx + 25, fy + 25);
-    } else if (type == TILE_INTERSECT) {
+    }
+    else if (type == TILE_INTERSECT) {
         glVertex2f(fx + 15, fy + 20); glVertex2f(fx + 25, fy + 20);
         glVertex2f(fx + 20, fy + 15); glVertex2f(fx + 20, fy + 25);
     }
     glEnd();
 
-    // Светофор (зелёный/жёлтый/красный круг с ободком)
+    // Светофор (зелёный / жёлтый / красный круг с ободком)
     if (type == TILE_TRAFFIC_LIGHT_GREEN || type == TILE_TRAFFIC_LIGHT_YELLOW || type == TILE_TRAFFIC_LIGHT_RED) {
         float centerX = fx + 20.0f;
         float centerY = fy + 20.0f;
@@ -296,9 +334,9 @@ static void drawTile(int x, int y, int type) {
 
         if (type == TILE_TRAFFIC_LIGHT_GREEN)       glColor3f(0.0f, 1.0f, 0.0f);
         else if (type == TILE_TRAFFIC_LIGHT_YELLOW) glColor3f(1.0f, 1.0f, 0.0f);
-        else                                        glColor3f(1.0f, 0.0f, 0.0f);
+        else     glColor3f(1.0f, 0.0f, 0.0f);
 
-        drawFilledCircle(centerX, centerY, lightRadius, 30);
+            drawFilledCircle(centerX, centerY, lightRadius, 30);
     }
 
     // Рамка спавнера
@@ -328,8 +366,6 @@ void drawVehicle(Vehicle* v) {
 
     glRotatef(angle - 90.0f, 0.0f, 0.0f, 1.0f);
 
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, carTex);
     glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
@@ -345,7 +381,6 @@ void drawVehicle(Vehicle* v) {
     glEnd();
 
     glDisable(GL_TEXTURE_2D);
-    glDisable(GL_BLEND);
     glPopMatrix();
 }
 
@@ -430,13 +465,32 @@ void render(void) {
         }
     } else if (currentState == STATE_SIMULATION) {
         // Карта
-        for (int y = 0; y < MAP_HEIGHT; y++)
-            for (int x = 0; x < MAP_WIDTH; x++)
-                drawTile(x, y, gameMap[y][x]);
+        for (int y = 0; y < MAP_HEIGHT; y++) {
+            for (int x = 0; x < MAP_WIDTH; x++) {
+                int tile = gameMap[y][x];
+                if (tile == TILE_HOUSE || tile == TILE_HOUSE_BROWN || tile == TILE_TREE || tile == TILE_TREE_ORANGE || tile == TILE_TREE_GREEN || tile == TILE_TREE_RED) {
+                    drawTile(x, y, TILE_GRASS);
+                }
+                else {
+                    drawTile(x, y, tile);
+                }
+            }
+        }
 
         // Машины
-        for (int i = 0; i < MAX_VEHICLES; i++)
+        for (int i = 0; i < MAX_VEHICLES; i++) {
             if (vehicles[i].active) drawVehicle(&vehicles[i]);
+        }
+
+        // ТЕкстурки
+        for (int y = 0; y < MAP_HEIGHT; y++) {
+            for (int x = 0; x < MAP_WIDTH; x++) {
+                int tile = gameMap[y][x];
+                if (tile == TILE_HOUSE || tile == TILE_HOUSE_BROWN || tile == TILE_TREE || tile == TILE_TREE_ORANGE || tile == TILE_TREE_GREEN || tile == TILE_TREE_RED) {
+                    drawTile(x, y, tile);
+                }
+            }
+        }
 
         // HUD
         if (isEditMode) {
