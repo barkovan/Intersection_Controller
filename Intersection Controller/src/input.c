@@ -77,13 +77,15 @@ void mouse_button_callback(GLFWwindow* w, int button, int action, int mods) {
             int gridY = mouseY / 40;
 
             if (gridX >= 0 && gridX < MAP_WIDTH && gridY >= 0 && gridY < MAP_HEIGHT) {
-                if (isEditMode) {
-                    // РЕЖИМ РЕДАКТИРОВАНИЯ: Рисуем дороги
-                    if (button == GLFW_MOUSE_BUTTON_LEFT) {
-                        gameMap[gridY][gridX] = currentBrush;
-                    }
-                    else if (button == GLFW_MOUSE_BUTTON_RIGHT) {
-                        gameMap[gridY][gridX] = TILE_GRASS;
+                if (isPauseMode) {
+                    if (currentLevel == 0) {
+                        // РЕЖИМ РЕДАКТИРОВАНИЯ: Рисуем дороги
+                        if (button == GLFW_MOUSE_BUTTON_LEFT) {
+                            gameMap[gridY][gridX] = currentBrush;
+                        }
+                        else if (button == GLFW_MOUSE_BUTTON_RIGHT) {
+                            gameMap[gridY][gridX] = TILE_GRASS;
+                        }
                     }
                 }
                 else {
@@ -114,7 +116,7 @@ void key_callback(GLFWwindow* w, int key, int scancode, int action, int mods) {
     if (key == GLFW_KEY_F8) showDebugGrid = !showDebugGrid; // Дебаг сетка
 
     // Переключение режима по пробелу
-    if (key == GLFW_KEY_SPACE) isEditMode = !isEditMode;
+    if (key == GLFW_KEY_SPACE) isPauseMode = !isPauseMode;
 
     // Переключение выбора плитки
     if (key == GLFW_KEY_1) currentBrush = TILE_ROAD_RIGHT;

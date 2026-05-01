@@ -47,7 +47,7 @@ extern GLFWwindow* window;
 
 extern int mouseX, mouseY;
 extern int currentLevel;
-extern int isEditMode;
+extern int isPauseMode;
 
 // Шрифты
 extern GLuint fontBaseTitle;

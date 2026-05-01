@@ -293,34 +293,36 @@ static void drawTile(int x, int y, int type) {
     glEnd();
 
     // Стрелки направления на дорогах
-    glColor3f(0.5f, 0.5f, 0.5f);
-    glLineWidth(2.0f);
-    glBegin(GL_LINES);
-    if (type == TILE_ROAD_RIGHT) {
-        glVertex2f(fx + 10, fy + 20); glVertex2f(fx + 30, fy + 20);
-        glVertex2f(fx + 30, fy + 20); glVertex2f(fx + 25, fy + 15);
-        glVertex2f(fx + 30, fy + 20); glVertex2f(fx + 25, fy + 25);
+    if (isPauseMode) {
+        glColor3f(0.5f, 0.5f, 0.5f);
+        glLineWidth(2.0f);
+        glBegin(GL_LINES);
+        if (type == TILE_ROAD_RIGHT) {
+            glVertex2f(fx + 10, fy + 20); glVertex2f(fx + 30, fy + 20);
+            glVertex2f(fx + 30, fy + 20); glVertex2f(fx + 25, fy + 15);
+            glVertex2f(fx + 30, fy + 20); glVertex2f(fx + 25, fy + 25);
+        }
+        else if (type == TILE_ROAD_LEFT) {
+            glVertex2f(fx + 30, fy + 20); glVertex2f(fx + 10, fy + 20);
+            glVertex2f(fx + 10, fy + 20); glVertex2f(fx + 15, fy + 15);
+            glVertex2f(fx + 10, fy + 20); glVertex2f(fx + 15, fy + 25);
+        }
+        else if (type == TILE_ROAD_UP) {
+            glVertex2f(fx + 20, fy + 30); glVertex2f(fx + 20, fy + 10);
+            glVertex2f(fx + 20, fy + 10); glVertex2f(fx + 15, fy + 15);
+            glVertex2f(fx + 20, fy + 10); glVertex2f(fx + 25, fy + 15);
+        }
+        else if (type == TILE_ROAD_DOWN) {
+            glVertex2f(fx + 20, fy + 10); glVertex2f(fx + 20, fy + 30);
+            glVertex2f(fx + 20, fy + 30); glVertex2f(fx + 15, fy + 25);
+            glVertex2f(fx + 20, fy + 30); glVertex2f(fx + 25, fy + 25);
+        }
+        else if (type == TILE_INTERSECT) {
+            glVertex2f(fx + 15, fy + 20); glVertex2f(fx + 25, fy + 20);
+            glVertex2f(fx + 20, fy + 15); glVertex2f(fx + 20, fy + 25);
+        }
+        glEnd();
     }
-    else if (type == TILE_ROAD_LEFT) {
-        glVertex2f(fx + 30, fy + 20); glVertex2f(fx + 10, fy + 20);
-        glVertex2f(fx + 10, fy + 20); glVertex2f(fx + 15, fy + 15);
-        glVertex2f(fx + 10, fy + 20); glVertex2f(fx + 15, fy + 25);
-    }
-    else if (type == TILE_ROAD_UP) {
-        glVertex2f(fx + 20, fy + 30); glVertex2f(fx + 20, fy + 10);
-        glVertex2f(fx + 20, fy + 10); glVertex2f(fx + 15, fy + 15);
-        glVertex2f(fx + 20, fy + 10); glVertex2f(fx + 25, fy + 15);
-    }
-    else if (type == TILE_ROAD_DOWN) {
-        glVertex2f(fx + 20, fy + 10); glVertex2f(fx + 20, fy + 30);
-        glVertex2f(fx + 20, fy + 30); glVertex2f(fx + 15, fy + 25);
-        glVertex2f(fx + 20, fy + 30); glVertex2f(fx + 25, fy + 25);
-    }
-    else if (type == TILE_INTERSECT) {
-        glVertex2f(fx + 15, fy + 20); glVertex2f(fx + 25, fy + 20);
-        glVertex2f(fx + 20, fy + 15); glVertex2f(fx + 20, fy + 25);
-    }
-    glEnd();
 
     // Светофор (зелёный / жёлтый / красный круг с ободком)
     if (type == TILE_TRAFFIC_LIGHT_GREEN || type == TILE_TRAFFIC_LIGHT_YELLOW || type == TILE_TRAFFIC_LIGHT_RED) {
@@ -419,8 +421,6 @@ void render(void) {
 
     glDisable(GL_TEXTURE_2D);
 
-    if (showDebugGrid) drawDebugGrid();
-
     updateButtons();
 
     if (currentState == STATE_MENU) {
@@ -493,9 +493,14 @@ void render(void) {
         }
 
         // HUD
-        if (isEditMode) {
+        if (isPauseMode) {
             glColor3f(1.0f, 0.5f, 0.0f);
-            drawText(fontBase, 30, 30, "MODE: MAP EDITOR");
+            if (currentLevel == 0) {
+                drawText(fontBase, 30, 30, "MODE: MAP EDITOR");
+            }
+            else {
+                drawText(fontBase, 30, 30, "MODE: PAUSE");
+            }
             glColor3f(1.0f, 1.0f, 1.0f);
             drawText(fontBase, 30, 70, "PRESS [SPACE] TO START SIMULATION");
         } else {
@@ -509,21 +514,24 @@ void render(void) {
         sprintf(levelText, "CURRENT LEVEL: %d", currentLevel);
         drawText(fontBase, 30, 110, levelText);
 
-        // Текущая кисть редактора
-        char brushText[30];
-        const char* typeName = "Unknown";
-        switch (currentBrush) {
-        case TILE_ROAD_RIGHT: typeName = "Road Right >"; break;
-        case TILE_ROAD_LEFT:  typeName = "Road Left <"; break;
-        case TILE_ROAD_UP:    typeName = "Road Up /\\"; break;
-        case TILE_ROAD_DOWN:  typeName = "Road Down \\/"; break;
-        case TILE_TRAFFIC_LIGHT_GREEN: typeName = "Traffic Light"; break;
-        case TILE_INTERSECT:  typeName = "Intersection"; break;
-        case TILE_SPAWN:      typeName = "Spawner"; break;
+        if (currentLevel == 0) {
+            // Текущая кисть редактора
+            char brushText[30];
+            const char* typeName = "Unknown";
+
+            switch (currentBrush) {
+            case TILE_ROAD_RIGHT: typeName = "Road Right >"; break;
+            case TILE_ROAD_LEFT:  typeName = "Road Left <"; break;
+            case TILE_ROAD_UP:    typeName = "Road Up /\\"; break;
+            case TILE_ROAD_DOWN:  typeName = "Road Down \\/"; break;
+            case TILE_TRAFFIC_LIGHT_GREEN: typeName = "Traffic Light"; break;
+            case TILE_INTERSECT:  typeName = "Intersection"; break;
+            case TILE_SPAWN:      typeName = "Spawner"; break;
+            }
+            sprintf(brushText, "BRUSH: %s", typeName);
+            glColor3f(1.0f, 1.0f, 1.0f);
+            drawText(fontBase, 30, 150, brushText);
         }
-        sprintf(brushText, "BRUSH: %s", typeName);
-        glColor3f(1.0f, 1.0f, 1.0f);
-        drawText(fontBase, 30, 150, brushText);
     }
     else if (currentState == STATE_HELP) {
         // Фоновая клякса
@@ -556,7 +564,7 @@ void render(void) {
 
         // Заголовок
         glColor3f(1.0f, 1.0f, 0.3f);
-        drawText(fontBaseHov, GX(11), GY(2), "HOW TO PLAY");
+        drawText(fontBaseHov, GX(13), GY(2), "HOW TO PLAY");
 
         // Редактор
         glColor3f(1.0f, 0.7f, 0.3f);
@@ -573,26 +581,28 @@ void render(void) {
         drawText(fontBase, GX(4), startY + lineHeight * 8, "F8 - Toggle debug grid");
 
         // Симуляция
-        float simY = startY + lineHeight * 10;
+        float simY = GY(4);
         glColor3f(1.0f, 0.7f, 0.3f);
-        drawText(fontBaseHov, GX(4), simY, "SIMULATION MODE:");
+        drawText(fontBaseHov, GX(19), simY, "SIMULATION MODE:");
 
         glColor3f(0.9f, 0.9f, 0.9f);
-        drawText(fontBase, GX(4), simY + lineHeight, "LMB on traffic light - Toggle signal");
-        drawText(fontBase, GX(4), simY + lineHeight * 2, "SPACE - Switch to Editor mode");
-        drawText(fontBase, GX(4), simY + lineHeight * 3, "F8 - Toggle debug grid");
+        drawText(fontBase, GX(19), simY + lineHeight, "LMB on traffic light - Toggle signal");
+        drawText(fontBase, GX(19), simY + lineHeight * 2, "SPACE - Switch to Editor mode");
+        drawText(fontBase, GX(19), simY + lineHeight * 3, "F8 - Toggle debug grid");
 
         // Общее
         float generalY = simY + lineHeight * 5;
         glColor3f(1.0f, 0.7f, 0.3f);
-        drawText(fontBaseHov, GX(4), generalY, "GENERAL:");
+        drawText(fontBaseHov, GX(19), generalY, "GENERAL:");
 
         glColor3f(0.9f, 0.9f, 0.9f);
-        drawText(fontBase, GX(4), generalY + lineHeight, "ESC - Return to main menu");
+        drawText(fontBase, GX(19), generalY + lineHeight, "ESC - Return to main menu");
 
         glDisable(GL_TEXTURE_2D);   // выключаем текстуру
         glEnable(GL_BLEND);         // включаем блендинг обратно (если был выключен)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glColor4f(1.0f, 1.0f, 1.0f, 1.0f);  // сбрасываем цвет
     }
+
+    if (showDebugGrid) drawDebugGrid();
 }

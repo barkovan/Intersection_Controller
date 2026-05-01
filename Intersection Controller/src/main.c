@@ -24,7 +24,7 @@ GLFWwindow* window = NULL;
 // Ввод
 int mouseX = 0, mouseY = 0;
 int currentLevel = 1;
-int isEditMode = 1;          // 1 – редактор, 0 – симуляция
+int isPauseMode = 1;          // 1 – редактор, 0 – симуляция
 
 // Шрифты
 GLuint fontBaseTitle = 0;
@@ -172,7 +172,7 @@ int main(int argc, char** argv) {
         deltaTime = (float)(currentTime - lastTime);
         lastTime = currentTime;
 
-        if (currentState == STATE_SIMULATION && !isEditMode) {
+        if (currentState == STATE_SIMULATION && !isPauseMode) {
             updateVehicles(deltaTime);
             spawnLogic(deltaTime);
             updateTrafficLights();
