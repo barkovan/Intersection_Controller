@@ -433,8 +433,6 @@ static void drawTile(int x, int y, int type) {
 
 // Рисует машину с текстурой и поворотом в зависимости от направления
 void drawVehicle(Vehicle* v) {
-    if (!v->active) return;
-
     glPushMatrix();
     glTranslatef(v->x, v->y, 0.0f);
 
@@ -558,9 +556,12 @@ void render(void) {
         }
 
         // Машины
-        for (int i = 0; i < MAX_VEHICLES; i++) {
-            if (vehicles[i].active) drawVehicle(&vehicles[i]);
+        Vehicle* currV = vehicleList;
+        while (currV != NULL) {
+            drawVehicle(currV);
+            currV = currV->next;
         }
+        
         // кусты
         for (int y = 0; y < MAP_HEIGHT; y++) {
             for (int x = 0; x < MAP_WIDTH; x++) {

@@ -7,9 +7,8 @@ void loadLevel(int levelId) {
             gameMap[y][x] = TILE_GRASS;
         }
     }
-    for (int i = 0; i < MAX_VEHICLES; i++) {
-        vehicles[i].active = 0;
-    }
+
+    clearAllVehicles();
 
     // генерация уровней
     if (levelId == 1) { // easy

@@ -1,55 +1,90 @@
 #include "../header/vehicle.h"
-
 #include <math.h>
 #include <stdlib.h>
 #include <GLFW/glfw3.h>
 
+// Глобальный указатель на голову списка
+Vehicle* vehicleList = NULL;
 
-// ========== ФИЗИКА И ЛОГИКА МАШИН ==========
+// --- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ДЛЯ СПИСКА ---
 
-// Проверяет, можно ли ехать из клетки (gx,gy) в направлении (dx,dy) – чтобы не выехать на встречку
+// Добавление новой машины в начало списка
+Vehicle* createVehicle(float x, float y) {
+    Vehicle* newV = (Vehicle*)malloc(sizeof(Vehicle));
+    if (!newV) return NULL;
+
+    newV->x = x;
+    newV->y = y;
+    newV->speed = 0.0f;
+    newV->dirX = 0;
+    newV->dirY = 0;
+    newV->canTurn = 1;
+
+    // Вставка в начало двусвязного списка
+    newV->prev = NULL;
+    newV->next = vehicleList;
+    if (vehicleList != NULL) {
+        vehicleList->prev = newV;
+    }
+    vehicleList = newV;
+
+    return newV;
+}
+
+// Удаление машины из памяти
+void deleteVehicle(Vehicle* v) {
+    if (!v) return;
+
+    if (v->prev) v->prev->next = v->next;
+    if (v->next) v->next->prev = v->prev;
+
+    if (v == vehicleList) {
+        vehicleList = v->next;
+    }
+
+    free(v);
+}
+
+// --- ЛОГИКА ---
+bool isDirectionSafe(int gx, int gy, int dx, int dy);
+void updateVehicles(float dt);
+
 bool isDirectionSafe(int gx, int gy, int dx, int dy) {
     int cx = gx + dx;
     int cy = gy + dy;
 
     while (cx >= 0 && cx < MAP_WIDTH && cy >= 0 && cy < MAP_HEIGHT) {
         int tile = gameMap[cy][cx];
-
         if (tile == TILE_INTERSECT || tile == TILE_TRAFFIC_LIGHT_GREEN) {
-            cx += dx;
-            cy += dy;
-            continue;
+            cx += dx; cy += dy; continue;
         }
-
         if (dx == 1 && tile == TILE_ROAD_RIGHT) return true;
         if (dx == -1 && tile == TILE_ROAD_LEFT)  return true;
         if (dy == -1 && tile == TILE_ROAD_UP)    return true;
         if (dy == 1 && tile == TILE_ROAD_DOWN)  return true;
         if (tile == TILE_SPAWN)                  return true;
         if (tile == TILE_TRAFFIC_LIGHT_GREEN)    return true;
-
         return false;
     }
     return false;
 }
 
-// Обновляет положение и скорость всех машин
 void updateVehicles(float dt) {
-    // Настраиваем габариты машины (в пикселях)
-    float carLength = 55.0f;     // Полная длина (для расчёта ДТП и дистанции)
-    float halfCarLength = carLength / 2; // От центра до бампера (чтобы капот не торчал на перекрестке)
+    float carLength = 55.0f;
+    float halfCarLength = carLength / 2;
 
-    for (int i = 0; i < MAX_VEHICLES; i++) {
-        if (!vehicles[i].active) continue;
-        Vehicle* v = &vehicles[i];
+    Vehicle* v = vehicleList;
+    while (v != NULL) {
+        // Запоминаем следующую машину сразу, т.к. текущую можем удалить
+        Vehicle* nextVehicle = v->next;
 
         int currGx = (int)(v->x / 40.0f);
         int currGy = (int)(v->y / 40.0f);
 
-        // 1. ПОИСК СВЕТОФОРА (Смотрим на несколько клеток вперед)
+        // поиск светофора
         int mustStopForRed = 0;
         float distToStopLine = 10000.0f;
-        int lookAheadCells = 5; // Просматриваем до 5 клеток (200 пикселей) вперед
+        int lookAheadCells = 5;
 
         for (int step = 1; step <= lookAheadCells; step++) {
             int checkGx = currGx + v->dirX * step;
@@ -59,76 +94,55 @@ void updateVehicles(float dt) {
                 int tile = gameMap[checkGy][checkGx];
                 if (tile == TILE_TRAFFIC_LIGHT_RED || tile == TILE_TRAFFIC_LIGHT_YELLOW) {
                     mustStopForRed = 1;
-
-                    // Считаем дистанцию до края клетки светофора минус длина капота
                     float stopLine = 0.0f;
                     float dist = 0.0f;
 
-                    if (v->dirX > 0) {
-                        stopLine = checkGx * 40.0f; // Левый край клетки
-                        dist = stopLine - (v->x + halfCarLength);
-                    }
-                    else if (v->dirX < 0) {
-                        stopLine = (checkGx + 1) * 40.0f; // Правый край клетки
-                        dist = (v->x - halfCarLength) - stopLine;
-                    }
-                    else if (v->dirY > 0) {
-                        stopLine = checkGy * 40.0f; // Верхний край клетки
-                        dist = stopLine - (v->y + halfCarLength);
-                    }
-                    else if (v->dirY < 0) {
-                        stopLine = (checkGy + 1) * 40.0f; // Нижний край клетки
-                        dist = (v->y - halfCarLength) - stopLine;
-                    }
+                    if (v->dirX > 0) { stopLine = checkGx * 40.0f; dist = stopLine - (v->x + halfCarLength); }
+                    else if (v->dirX < 0) { stopLine = (checkGx + 1) * 40.0f; dist = (v->x - halfCarLength) - stopLine; }
+                    else if (v->dirY > 0) { stopLine = checkGy * 40.0f; dist = stopLine - (v->y + halfCarLength); }
+                    else if (v->dirY < 0) { stopLine = (checkGy + 1) * 40.0f; dist = (v->y - halfCarLength) - stopLine; }
 
-                    // Если чуть-чуть переехали стоп-линию (до 5 пикселей) - стоим на месте
-                    if (dist > -5.0f && dist < distToStopLine) {
-                        distToStopLine = (dist > 0.0f) ? dist : 0.0f;
-                    }
-                    break; // Нашли ближайший светофор, дальше не смотрим
+                    if (dist > -5.0f && dist < distToStopLine) distToStopLine = (dist > 0.0f) ? dist : 0.0f;
+                    break;
                 }
             }
         }
 
-        // 2. РАССТОЯНИЕ ДО БЛИЖАЙШЕЙ МАШИНЫ ВПЕРЕДИ
+        // Расстояние до ближайших машин
         float distToCar = 10000.0f;
-        for (int j = 0; j < MAX_VEHICLES; j++) {
-            if (i == j || !vehicles[j].active) continue;
-            Vehicle* other = &vehicles[j];
+        Vehicle* other = vehicleList;
+        while (other != NULL) {
+            if (v == other) { other = other->next; continue; }
 
-            // Если машина едет перпендикулярно (бок к боку), мы её игнорируем
-            if (v->dirX != other->dirX || v->dirY != other->dirY) continue;
+            if (v->dirX != other->dirX || v->dirY != other->dirY) { other = other->next; continue; }
 
             float dx = other->x - v->x;
             float dy = other->y - v->y;
 
-            // Проверяем, что машина действительно находится ПЕРЕД нами в том же ряду
-            if ((v->dirX > 0 && dx > 0 && fabsf(dy) < 15.0f) ||
+            if ((v->dirX > 0 && dx > 0 && fabsf(dy) <
+
+
+                15.0f) ||
                 (v->dirX < 0 && dx < 0 && fabsf(dy) < 15.0f) ||
                 (v->dirY > 0 && dy > 0 && fabsf(dx) < 15.0f) ||
                 (v->dirY < 0 && dy < 0 && fabsf(dx) < 15.0f)) {
-
-                // Вычитаем длину машины
                 float dist = sqrtf(dx * dx + dy * dy) - carLength;
                 if (dist < distToCar) distToCar = (dist > 0.0f) ? dist : 0.0f;
             }
+            other = other->next;
         }
 
-        // 3. ЖЕЛАЕМАЯ СКОРОСТЬ
+        // Скорость и ускорение
         float desiredSpeed = VEHICLE_MAX_SPEED;
         float obstacleDist = distToCar;
-        if (mustStopForRed && distToStopLine < obstacleDist) {
-            obstacleDist = distToStopLine;
-        }
+        if (mustStopForRed && distToStopLine < obstacleDist) obstacleDist = distToStopLine;
 
-        // Плавное торможение, если препятствие близко
         if (obstacleDist < 200.0f) {
             float maxSafe = sqrtf(VEHICLE_DECELERATION * obstacleDist);
             if (maxSafe < desiredSpeed) desiredSpeed = maxSafe;
         }
         if (obstacleDist <= 1.0f) desiredSpeed = 0.0f;
 
-        // 4. ПЛАВНОЕ УСКОРЕНИЕ/ЗАМЕДЛЕНИЕ
         if (v->speed < desiredSpeed) {
             v->speed += VEHICLE_ACCELERATION * dt;
             if (v->speed > desiredSpeed) v->speed = desiredSpeed;
@@ -138,55 +152,51 @@ void updateVehicles(float dt) {
             if (v->speed < desiredSpeed) v->speed = desiredSpeed;
         }
 
-        // 5. ДВИЖЕНИЕ
+        //  Движение и удаление
         float move = v->speed * dt;
         float prevX = v->x, prevY = v->y;
         v->x += v->dirX * move;
         v->y += v->dirY * move;
 
-        // Выезд за границы или на траву – удаление
         int gx = (int)(v->x / 40.0f);
         int gy = (int)(v->y / 40.0f);
-        if (gx < 0 || gx >= MAP_WIDTH || gy < 0 || gy >= MAP_HEIGHT) {
-            v->active = 0;
+
+        if (gx < 0 || gx >= MAP_WIDTH || gy < 0 || gy >= MAP_HEIGHT || gameMap[gy][gx] == TILE_GRASS) {
+            deleteVehicle(v);
+            v = nextVehicle;
             continue;
         }
-        if (gameMap[gy][gx] == TILE_GRASS) {
-            v->active = 0;
-            continue;
-        }
 
-
-        // 6. АВАРИИ
-        for (int j = 0; j < MAX_VEHICLES; j++) {
-            if (i == j || !vehicles[j].active) continue;
-            Vehicle* other = &vehicles[j];
-
-            float dx = other->x - v->x;
-            float dy = other->y - v->y;
+        // Аварии
+        Vehicle* crashOther = vehicleList;
+        int crashed = 0;
+        while (crashOther != NULL) {
+            if (v == crashOther) { crashOther = crashOther->next; continue; }
+            float dx = crashOther->x - v->x;
+            float dy = crashOther->y - v->y;
             float centerDist = sqrtf(dx * dx + dy * dy);
 
-            int needBeChecked = 0;
-            if ((abs(v->dirX) == abs(other->dirX) && v->y == other->y) || (abs(v->dirY) == abs(other->dirY) && v->x == other->x)) {
-                needBeChecked = 1; // Первый случай: машины едут друг за другом или навстречу друг другу
-            }
-            else if (abs(v->dirX) != abs(other->dirX) || abs(v->dirY) != abs(other->dirY)) {
-                needBeChecked = 2; // Второй случай: машина едет сбоку от другой
-            }
+            if (centerDist < carLength * 0.70f) {
+                // сохраняем следующий за crashOther, чтобы не потерять nextVehicle
+                Vehicle* otherNext = crashOther->next;
+                deleteVehicle(crashOther);
 
-            if (needBeChecked == 1 && centerDist < carLength) {
-                other->active = 0;
-                v->active = 0;
+                // если nextVehicle указывал на crashOther, сдвигаемся дальше
+                if (nextVehicle == crashOther)
+                    nextVehicle = otherNext;
+
+                deleteVehicle(v);
+                crashed = 1;
                 break;
             }
-            else if (needBeChecked == 2 && centerDist < carLength * 3/4) {
-                other->active = 0;
-                v->active = 0;
-                break;
-            }
+            crashOther = crashOther->next;
+        }
+        if (crashed) {
+            v = nextVehicle;
+            continue;
         }
 
-        // 7. ЛОГИКА ЦЕНТРИРОВАНИЯ И ПОВОРОТОВ
+        // Повороты и центрирование
         int tile = gameMap[gy][gx];
         float centerX = (float)gx * 40.0f + 20.0f;
         float centerY = (float)gy * 40.0f + 20.0f;
@@ -201,126 +211,107 @@ void updateVehicles(float dt) {
         else if (v->dirY < 0 && prevY >= centerY && v->y <= centerY) crossedCenter = 1;
 
         if (crossedCenter) {
-            v->x = centerX;
-            v->y = centerY;
-
-            if (tile == TILE_ROAD_RIGHT) { v->dirX = 1;  v->dirY = 0; }
+            v->x = centerX; v->y = centerY;
+            if (tile == TILE_ROAD_RIGHT) { v->dirX = 1; v->dirY = 0; }
             else if (tile == TILE_ROAD_LEFT) { v->dirX = -1; v->dirY = 0; }
-            else if (tile == TILE_ROAD_UP) { v->dirX = 0;  v->dirY = -1; }
-            else if (tile == TILE_ROAD_DOWN) { v->dirX = 0;  v->dirY = 1; }
-            else if (tile == TILE_INTERSECT) {
-                if (v->canTurn) {
-                    int possibleDirs[4][2] = { {1,0}, {-1,0}, {0,1}, {0,-1} };
-                    int validIndices[4];
-                    int validCount = 0;
-                    int straightIndex = -1; // Индекс направления "прямо"
+            else if (tile == TILE_ROAD_UP) { v->dirX = 0; v->dirY = -1; }
+            else if (tile == TILE_ROAD_DOWN) { v->dirX = 0; v->dirY = 1; }
+            else if ((tile == TILE_INTERSECT || tile == TILE_SPAWN) && v->canTurn) {
 
-                    for (int d = 0; d < 4; d++) {
-                        int vx = possibleDirs[d][0];
-                        int vy = possibleDirs[d][1];
-                        if (vx == -v->dirX && vy == -v->dirY && (v->dirX != 0 || v->dirY != 0)) continue;
-                        if (isDirectionSafe(gx, gy, vx, vy)) {
-                            validIndices[validCount] = d;
-                            if (vx == v->dirX && vy == v->dirY) {
-                                straightIndex = validCount;
-                            }
-                            validCount++;
-                        }
-                    }
-                    if (validCount > 0) {
-                        int choiceIndex = -1;
-
-                        // Машина поедет прямо, если это возможно
-                        if (straightIndex != -1) {
-                            choiceIndex = validIndices[straightIndex];
-                        }
-                        else {
-                            choiceIndex = validIndices[rand() % validCount];
-                        }
-
-                        float newDirX = (float)possibleDirs[choiceIndex][0];
-                        float newDirY = (float)possibleDirs[choiceIndex][1];
-                        if (newDirX != v->dirX || newDirY != v->dirY) v->canTurn = 0;
-                        v->dirX = (int)newDirX;
-                        v->dirY = (int)newDirY;
-                    }
-                }
-            }
-            else if (tile == TILE_SPAWN) {
                 int possibleDirs[4][2] = { {1,0}, {-1,0}, {0,1}, {0,-1} };
                 int validIndices[4];
                 int validCount = 0;
+                int straightIndex = -1;
+
                 for (int d = 0; d < 4; d++) {
-                    if (isDirectionSafe(gx, gy, possibleDirs[d][0], possibleDirs[d][1]))
-                        validIndices[validCount++] = d;
+                    int vx = possibleDirs[d][0];
+                    int vy = possibleDirs[d][1];
+
+                    // Запрещаем разворот назад (нельзя ехать в противоположную сторону)
+                    if (vx == -v->dirX && vy == -v->dirY && (v->dirX != 0 || v->dirY != 0)) continue;
+
+                    // Проверяем, безопасна ли клетка (не встречка ли там)
+                    if (isDirectionSafe(gx, gy, vx, vy)) {
+                        validIndices[validCount] = d;
+                        // Проверяем, является ли это направление движением "прямо"
+                        if (vx == v->dirX && vy == v->dirY) {
+                            straightIndex = validCount;
+                        }
+                        validCount++;
+                    }
                 }
+
                 if (validCount > 0) {
-                    int choice = validIndices[rand() % validCount];
-                    v->dirX = possibleDirs[choice][0];
-                    v->dirY = possibleDirs[choice][1];
-                    v->canTurn = 1;
+                    int choiceIndex = -1;
+
+                    // Приоритет: если можно ехать прямо, едем прямо (чтобы машины не метались)
+                    if (straightIndex != -1) {
+                        choiceIndex = validIndices[straightIndex];
+                    }
+                    else {
+                        // Если прямо нельзя (тупик или поворот), выбираем рандом из доступных
+                        choiceIndex = validIndices[rand() % validCount];
+                    }
+
+                    float newDirX = (float)possibleDirs[choiceIndex][0];
+                    float newDirY = (float)possibleDirs[choiceIndex][1];
+
+                    // Если направление изменилось, запрещаем поворачивать еще раз на этом же тайле
+                    if (newDirX != (float)v->dirX || newDirY != (float)v->dirY) {
+                        v->canTurn = 0;
+                    }
+
+                    v->dirX = (int)newDirX;
+                    v->dirY = (int)newDirY;
                 }
             }
-
-            v->x += v->dirX * 0.1f;
-            v->y += v->dirY * 0.1f;
+            v->x += v->dirX * 0.1f; v->y += v->dirY * 0.1f;
         }
+
+        v = nextVehicle; // Переходим к следующей машине в списке
     }
 }
 
-// Проверяет, нет ли активных машин слишком близко к точке (sx, sy)
 bool isSpawnAreaClear(float sx, float sy) {
-    float safeDist = 65.0f;
-    float safeDistSq = safeDist * safeDist; // Квадрат для ускорения вычислений
+    float safeDistSq = 65.0f * 65.0f;
+    Vehicle* curr =
 
-    for (int i = 0; i < MAX_VEHICLES; i++) {
-        if (!vehicles[i].active) continue;
 
-        float dx = vehicles[i].x - sx;
-        float dy = vehicles[i].y - sy;
-
-        // Если хоть одна машина ближе безопасного радиуса — спавнить нельзя
-        if ((dx * dx + dy * dy) < safeDistSq) {
-            return false;
-        }
+        vehicleList;
+    while (curr != NULL) {
+        float dx = curr->x - sx;
+        float dy = curr->y - sy;
+        if ((dx * dx + dy * dy) < safeDistSq) return false;
+        curr = curr->next;
     }
     return true;
 }
 
-// Появление новых машин на спавнерах раз в VEHICLE_SPAWN_INTERVAL
 void spawnLogic(float dt) {
     if (isPauseMode) return;
-
     for (int y = 0; y < MAP_HEIGHT; y++) {
         for (int x = 0; x < MAP_WIDTH; x++) {
             if (gameMap[y][x] == TILE_SPAWN) {
-
                 spawnTimers[y][x] += dt;
-
                 if (spawnTimers[y][x] >= VEHICLE_SPAWN_INTERVAL) {
-
                     float targetX = (float)x * 40.0f + 20.0f;
                     float targetY = (float)y * 40.0f + 20.0f;
-
                     if (isSpawnAreaClear(targetX, targetY)) {
-                        for (int i = 0; i < MAX_VEHICLES; i++) {
-                            if (!vehicles[i].active) {
-                                vehicles[i].active = 1;
-                                vehicles[i].x = targetX;
-                                vehicles[i].y = targetY;
-                                vehicles[i].speed = 0.0f;
-                                vehicles[i].dirX = 0;
-                                vehicles[i].dirY = 0;
-                                vehicles[i].canTurn = 1;
-
-                                spawnTimers[y][x] = 0.0f;
-
-                                break;
-                            }
-                        }
+                        createVehicle(targetX, targetY); // Создаем динамически
+                        spawnTimers[y][x] = 0.0f;
                     }
                 }
             }
         }
     }
+}
+
+void clearAllVehicles(void) {
+    Vehicle* curr = vehicleList;
+    while (curr != NULL) {
+        Vehicle* next = curr->next;
+        free(curr);
+        curr = next;
+    }
+    vehicleList = NULL;
 }

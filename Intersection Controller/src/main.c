@@ -65,7 +65,6 @@ GLuint bushRightdownTex = 0;
 
 // Карта
 int gameMap[MAP_HEIGHT][MAP_WIDTH] = { 0 };
-Vehicle vehicles[MAX_VEHICLES] = { 0 };
 int currentBrush = TILE_ROAD_RIGHT;
 
 // Таймеры спавнеров
@@ -217,6 +216,8 @@ int main(int argc, char** argv) {
     if (fontBaseHov)   glDeleteLists(fontBaseHov, 256);
 
     RemoveFontResourceEx(TEXT("../font/BeatMark-Regular.ttf"), FR_PRIVATE, NULL);
+
+    clearAllVehicles();
 
     glfwTerminate();
     printf("Traffic Simulator closed.\n");

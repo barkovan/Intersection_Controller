@@ -126,15 +126,15 @@ extern bool  yellowToGreen[MAP_HEIGHT][MAP_WIDTH];
 #define VEHICLE_DECELERATION    300.0f
 #define VEHICLE_SPAWN_INTERVAL  3.0f
 
-typedef struct {
+typedef struct Vehicle {
     float x, y;
     float speed;
     int dirX, dirY;
-    int active;
     int canTurn;
+    struct Vehicle* next;
+    struct Vehicle* prev;
 } Vehicle;
 
-#define MAX_VEHICLES 20
-extern Vehicle vehicles[MAX_VEHICLES];
+extern Vehicle* vehicleList;
 
 #endif // COMMON_H
