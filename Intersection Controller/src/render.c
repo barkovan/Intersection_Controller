@@ -202,7 +202,9 @@ static void drawTile(int x, int y, int type) {
 
     int offset = (currentLevel == 0) ? 1 : 0;
 
-    if (type == TILE_HOUSE || type == TILE_HOUSE_BROWN || type == TILE_TREE || type == TILE_TREE_ORANGE || type == TILE_TREE_GREEN || type == TILE_TREE_RED || type == TILE_TREE_BLACKGREEN) {
+    if (type == TILE_HOUSE || type == TILE_HOUSE_BROWN || type == TILE_HOUSE_BLACK || type == TILE_HOUSE_BLACK2
+        || type == TILE_TREE || type == TILE_TREE_ORANGE || type == TILE_TREE_GREEN || type == TILE_TREE_RED || type == TILE_TREE_BLACKGREEN
+        || type == TILE_BUSH_HOR || type == TILE_BUSH_VER || type == TILE_BUSH_VERRIGHT || type == TILE_BUSH_LEFTUP || type == TILE_BUSH_RIGHTUP || type == TILE_BUSH_RIGHTDOWN) {
         
         GLuint currentTex;
         float multiplier;
@@ -215,6 +217,14 @@ static void drawTile(int x, int y, int type) {
         case TILE_HOUSE_BROWN:
             multiplier = 10.0f;
             currentTex = houseBrownTex;
+            break;
+        case TILE_HOUSE_BLACK:
+            currentTex = houseBlackTex;
+            multiplier = 12.0f;
+            break;
+        case TILE_HOUSE_BLACK2:
+            currentTex = houseBlack2Tex;
+            multiplier = 13.0f;
             break;
         case TILE_TREE:
             currentTex = treeTex;
@@ -230,11 +240,35 @@ static void drawTile(int x, int y, int type) {
             break;
         case TILE_TREE_RED:
             currentTex = treeRedTex;
-            multiplier = 3.0f;
+            multiplier = 4.0f;
             break;
         case TILE_TREE_BLACKGREEN:
             currentTex = treeBlackgreenTex;
-            multiplier = 2.0f;
+            multiplier = 4.0f;
+            break;
+        case TILE_BUSH_HOR:
+            currentTex = bushHorTex;
+            multiplier = 1.05f;
+            break;
+        case TILE_BUSH_VER:
+            currentTex = bushVerTex;
+            multiplier = 1.05f;
+            break;
+        case TILE_BUSH_VERRIGHT:
+            currentTex = bushVerrightTex;
+            multiplier = 1.05f;
+            break;
+        case TILE_BUSH_LEFTUP:
+            currentTex = bushLeftupTex;
+            multiplier = 1.05f;
+            break;
+        case TILE_BUSH_RIGHTUP:
+            currentTex = bushRightupTex;
+            multiplier = 1.05f;
+            break;
+        case TILE_BUSH_RIGHTDOWN:
+            currentTex = bushRightdownTex;
+            multiplier = 1.05f;
             break;
         default:
             currentTex = houseTex;
@@ -512,7 +546,9 @@ void render(void) {
         for (int y = 0; y < MAP_HEIGHT; y++) {
             for (int x = 0; x < MAP_WIDTH; x++) {
                 int tile = gameMap[y][x];
-                if (tile == TILE_HOUSE || tile == TILE_HOUSE_BROWN || tile == TILE_TREE || tile == TILE_TREE_ORANGE || tile == TILE_TREE_GREEN || tile == TILE_TREE_RED || tile == TILE_TREE_BLACKGREEN) {
+                if (tile == TILE_HOUSE || tile == TILE_HOUSE_BROWN  || tile == TILE_HOUSE_BLACK || tile == TILE_HOUSE_BLACK2
+                    || tile == TILE_TREE || tile == TILE_TREE_ORANGE || tile == TILE_TREE_GREEN || tile == TILE_TREE_RED || tile == TILE_TREE_BLACKGREEN
+                    || tile == TILE_BUSH_HOR || tile == TILE_BUSH_VER || tile == TILE_BUSH_VERRIGHT || tile == TILE_BUSH_LEFTUP || tile == TILE_BUSH_RIGHTUP || tile == TILE_BUSH_RIGHTDOWN) {
                     drawTile(x, y, TILE_GRASS);
                 }
                 else {
@@ -525,12 +561,22 @@ void render(void) {
         for (int i = 0; i < MAX_VEHICLES; i++) {
             if (vehicles[i].active) drawVehicle(&vehicles[i]);
         }
-
-        // ТЕкстурки
+        // кусты
         for (int y = 0; y < MAP_HEIGHT; y++) {
             for (int x = 0; x < MAP_WIDTH; x++) {
                 int tile = gameMap[y][x];
-                if (tile == TILE_HOUSE || tile == TILE_HOUSE_BROWN || tile == TILE_TREE || tile == TILE_TREE_ORANGE || tile == TILE_TREE_GREEN || tile == TILE_TREE_RED || tile == TILE_TREE_BLACKGREEN) {
+                if (tile == TILE_BUSH_HOR || tile == TILE_BUSH_VER || tile == TILE_BUSH_VERRIGHT || tile == TILE_BUSH_LEFTUP || tile == TILE_BUSH_RIGHTUP || tile == TILE_BUSH_RIGHTDOWN) {
+                    drawTile(x, y, tile);
+                }
+            }
+        }
+
+        // Тeкстурки
+        for (int y = 0; y < MAP_HEIGHT; y++) {
+            for (int x = 0; x < MAP_WIDTH; x++) {
+                int tile = gameMap[y][x];
+                if (tile == TILE_HOUSE || tile == TILE_HOUSE_BROWN || tile == TILE_HOUSE_BLACK || tile == TILE_HOUSE_BLACK2
+                    || tile == TILE_TREE || tile == TILE_TREE_ORANGE || tile == TILE_TREE_GREEN || tile == TILE_TREE_RED || tile == TILE_TREE_BLACKGREEN) {
                     drawTile(x, y, tile);
                 }
             }

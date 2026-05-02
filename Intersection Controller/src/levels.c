@@ -45,14 +45,67 @@ void loadLevel(int levelId) {
 
         // текстурки
         gameMap[3][5] = TILE_HOUSE;
-        gameMap[3][12] = TILE_HOUSE_BROWN;
-        gameMap[4][8] = TILE_TREE;
-        gameMap[11][18] = TILE_TREE_ORANGE;
-        gameMap[6][18] = TILE_TREE_ORANGE;
-        gameMap[6][2] = TILE_TREE;
-        gameMap[6][25] = TILE_TREE;
-        gameMap[14][13] = TILE_TREE;
-        gameMap[3][20] = TILE_TREE_BLACKGREEN;
+        gameMap[3][26] = TILE_HOUSE_BLACK;
+        gameMap[16][5] = TILE_HOUSE_BROWN;
+        for (int x = 1; x < 10; x++) {
+            gameMap[14][x] = TILE_SIDEWALK;
+        }
+        for (int x = 1; x < 3; x++) {
+            for (int y = 15; y < 18; y++) {
+                gameMap[y][x] = TILE_SIDEWALK;
+            }
+        }
+        for (int x = 8; x < 10; x++) {
+            for (int y = 15; y < 18; y++) {
+                gameMap[y][x] = TILE_SIDEWALK;
+            }
+        }
+        for (int y = 11; y < 18; y++) {
+            gameMap[y][25] = TILE_SIDEWALK;
+        }
+        for (int x = 17; x < 32; x++) {
+            gameMap[16][x] = TILE_SIDEWALK;
+        }
+
+        // сверху
+        gameMap[6][0] = TILE_BUSH_RIGHTUP;
+        for (int y = 5; y > -1; y--) {
+            gameMap[y][0] = TILE_BUSH_VERRIGHT;
+        }
+        for (int x = 1; x < 3; x++) {
+            gameMap[6][x] = TILE_BUSH_HOR;
+        }
+        for (int x = 9; x < 16; x++) {
+            gameMap[6][x] = TILE_BUSH_HOR;
+        }
+        gameMap[6][16] = TILE_BUSH_RIGHTUP;
+        for (int y = 5; y > -1; y--) {
+            gameMap[y][16] = TILE_BUSH_VERRIGHT;
+        }
+        for (int x = 17; x < 24; x++) {
+            gameMap[6][x] = TILE_BUSH_HOR;
+        }
+        for (int x = 26; x < 32; x++) {
+            gameMap[6][x] = TILE_BUSH_HOR;
+        }
+        // слева снизу
+        for (int x = 0; x < 12; x++) {
+            gameMap[11][x] = TILE_BUSH_HOR;
+        }
+        gameMap[11][12] = TILE_BUSH_RIGHTDOWN;
+        for (int y = 12; y < 18; y++) {
+            gameMap[y][12] = TILE_BUSH_VERRIGHT;
+        }
+
+        gameMap[4][22] = TILE_TREE_ORANGE;
+        gameMap[0][19] = TILE_TREE_GREEN;
+        gameMap[1][10] = TILE_TREE_BLACKGREEN;
+        gameMap[4][13] = TILE_TREE;
+        gameMap[13][21] = TILE_HOUSE_BLACK2;
+        gameMap[11][27] = TILE_TREE;
+        gameMap[10][1] = TILE_TREE_GREEN;
+        gameMap[17][17] = TILE_TREE_ORANGE;
+        gameMap[16][1] = TILE_TREE_BLACKGREEN;
     }
     else if (levelId == 2) { //medium
         // Создаем одну горизонтальную дорогу
@@ -83,6 +136,36 @@ void loadLevel(int levelId) {
         gameMap[9][0] = TILE_SPAWN; // Машины слева направо
         gameMap[17][16] = TILE_SPAWN; // Машины снизу вверх
         gameMap[0][15] = TILE_SPAWN; // Машины сверху вниз
+
+        // Дома
+        gameMap[3][5] = TILE_HOUSE_BROWN;
+        gameMap[3][25] = TILE_HOUSE_BLACK;
+        gameMap[15][5] = TILE_HOUSE;
+        gameMap[15][25] = TILE_HOUSE_BLACK2;
+
+        // Кусты вдоль горизонтального тротуара (сверху)
+        for (int x = 0; x < 12; x++) gameMap[6][x] = TILE_BUSH_HOR;
+        gameMap[6][12] = TILE_BUSH_RIGHTUP;
+        for (int x = 19; x < 32; x++) gameMap[6][x] = TILE_BUSH_HOR;
+
+        // Кусты вдоль горизонтального тротуара (снизу)
+        for (int x = 0; x < 12; x++) gameMap[11][x] = TILE_BUSH_HOR;
+        gameMap[11][12] = TILE_BUSH_RIGHTDOWN;
+        for (int x = 19; x < 32; x++) gameMap[11][x] = TILE_BUSH_HOR;
+
+        // Кусты вдоль вертикального тротуара
+        for (int y = 5; y > -1; y--) gameMap[y][12] = TILE_BUSH_VERRIGHT;
+        for (int y = 12; y < 18; y++) gameMap[y][12] = TILE_BUSH_VERRIGHT;
+
+        // Деревья (раскиданы группами)
+        gameMap[0][1] = TILE_TREE_GREEN;
+        gameMap[0][14] = TILE_TREE_ORANGE;
+        gameMap[6][13] = TILE_TREE_BLACKGREEN;
+        gameMap[13][10] = TILE_TREE_RED;
+        gameMap[17][0] = TILE_TREE_RED;
+        gameMap[15][30] = TILE_TREE_BLACKGREEN;
+        gameMap[4][19] = TILE_TREE;
+        gameMap[13][19] = TILE_TREE_ORANGE;
     }
     else if (levelId == 3) { // hard
         // 1. Главная горизонтальная дорога (на всю ширину)
@@ -134,5 +217,43 @@ void loadLevel(int levelId) {
         gameMap[8][31] = TILE_SPAWN;     // Въезд справа
         gameMap[17][11] = TILE_SPAWN;    // Въезд снизу (только для левой дороги)
         gameMap[0][22] = TILE_SPAWN;     // Въезд сверху (для обеих дорог)
+
+        gameMap[1][2] = TILE_HOUSE_BROWN;
+
+        // Слева снизу: Обычный дом
+        gameMap[15][2] = TILE_HOUSE;
+
+        // Справа снизу
+        gameMap[15][17] = TILE_HOUSE_BLACK;
+        gameMap[15][28] = TILE_HOUSE_BLACK2;
+
+        // Сверху по центру
+        gameMap[1][14] = TILE_TREE_GREEN;
+        gameMap[4][18] = TILE_TREE_ORANGE;
+
+        gameMap[6][31] = TILE_TREE_GREEN;
+
+        // Справа сверху
+        gameMap[1][28] = TILE_TREE_RED;
+
+        for (int x = 0; x < 7; x++) {
+            gameMap[5][x] = TILE_BUSH_HOR;
+        }
+        gameMap[5][7] = TILE_BUSH_RIGHTUP;
+        for (int y = 4; y > -1; y--) {
+            gameMap[y][7] = TILE_BUSH_VERRIGHT;
+        }
+        gameMap[5][8] = TILE_TREE;
+
+        for (int x = 14; x < 22; x++) {
+            gameMap[11][x] = TILE_BUSH_HOR;
+        }
+        gameMap[11][22] = TILE_BUSH_LEFTUP;
+        for (int y = 12; y < 18; y++) {
+            gameMap[y][22] = TILE_BUSH_VERRIGHT;
+        }
+        for (int x = 23; x < 32; x++) {
+            gameMap[11][x] = TILE_BUSH_HOR;
+        }
     }
 }

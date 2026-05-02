@@ -34,6 +34,8 @@ extern GLuint carTex;             // текстура автомобиля
 
 extern GLuint houseTex;           // текстура дома
 extern GLuint houseBrownTex;
+extern GLuint houseBlackTex;
+extern GLuint houseBlack2Tex;
 
 
 extern GLuint treeTex;            // текстура дерева
@@ -41,6 +43,13 @@ extern GLuint treeOrangeTex;
 extern GLuint treeGreenTex;
 extern GLuint treeRedTex;
 extern GLuint treeBlackgreenTex;
+
+extern GLuint bushHorTex;         // изгородь
+extern GLuint bushVerTex;
+extern GLuint bushVerrightTex;
+extern GLuint bushLeftupTex;
+extern GLuint bushRightupTex;
+extern GLuint bushRightdownTex;
 
 // Глобальные переменные
 extern GameState currentState;
@@ -91,11 +100,19 @@ typedef enum {
     TILE_SPAWN,
     TILE_HOUSE,
     TILE_HOUSE_BROWN,
+    TILE_HOUSE_BLACK,
+    TILE_HOUSE_BLACK2,
     TILE_TREE,
     TILE_TREE_ORANGE,
     TILE_TREE_GREEN,
     TILE_TREE_RED,
     TILE_TREE_BLACKGREEN,
+    TILE_BUSH_HOR,
+    TILE_BUSH_VER,
+    TILE_BUSH_VERRIGHT,
+    TILE_BUSH_LEFTUP,
+    TILE_BUSH_RIGHTUP,
+    TILE_BUSH_RIGHTDOWN,
     TILE_SIDEWALK
 } TileType;
 

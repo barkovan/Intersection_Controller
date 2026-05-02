@@ -47,12 +47,21 @@ GLuint carTex = 0;
 
 GLuint houseTex = 0;
 GLuint houseBrownTex = 0;
+GLuint houseBlackTex = 0;
+GLuint houseBlack2Tex = 0;
 
 GLuint treeTex = 0;
 GLuint treeOrangeTex = 0;
 GLuint treeGreenTex = 0;
 GLuint treeRedTex = 0;
 GLuint treeBlackgreenTex = 0;
+
+GLuint bushHorTex = 0;
+GLuint bushVerTex = 0;
+GLuint bushVerrightTex = 0;
+GLuint bushLeftupTex = 0;
+GLuint bushRightupTex = 0;
+GLuint bushRightdownTex = 0;
 
 // Карта
 int gameMap[MAP_HEIGHT][MAP_WIDTH] = { 0 };
@@ -153,12 +162,21 @@ int main(int argc, char** argv) {
 
     houseTex = loadTexture("assets/house.png");
     houseBrownTex = loadTexture("assets/house_brown.png");
+    houseBlackTex = loadTexture("assets/house_black.png");
+    houseBlack2Tex = loadTexture("assets/house_black2.png");
 
     treeTex = loadTexture("assets/tree.png");
     treeOrangeTex = loadTexture("assets/tree_orange.png");
     treeGreenTex = loadTexture("assets/tree_green.png");
     treeRedTex = loadTexture("assets/tree_red.png");
     treeBlackgreenTex = loadTexture("assets/tree_blackgreen.png");
+
+    bushHorTex = loadTexture("assets/bush_hor.png");
+    bushVerTex = loadTexture("assets/bush_ver.png");
+    bushVerrightTex = loadTexture("assets/bush_verright.png");
+    bushLeftupTex = loadTexture("assets/bush_leftup.png");
+    bushRightupTex = loadTexture("assets/bush_rightup.png");
+    bushRightdownTex = loadTexture("assets/bush_rightdown.png");
 
     if (carTex == 0) printf("Error: failed to load car texture\n");
 
