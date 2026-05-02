@@ -1,6 +1,19 @@
 #include "../header/levels.h"
 #include "../header/common.h"
 
+#include <stdlib.h> 
+
+void randomizeSpawnTimers(void) {
+    for (int y = 0; y < MAP_HEIGHT; y++) {
+        for (int x = 0; x < MAP_WIDTH; x++) {
+            if (gameMap[y][x] == TILE_SPAWN) {
+                // случайное значение от 0 до VEHICLE_SPAWN_INTERVAL
+                spawnTimers[y][x] = 2.0f + (float)rand() / (float)RAND_MAX * (VEHICLE_SPAWN_INTERVAL - 2.0f);
+            }
+        }
+    }
+}
+
 void loadLevel(int levelId) {
     for (int y = 0; y < MAP_HEIGHT; y++) {
         for (int x = 0; x < MAP_WIDTH; x++) {
@@ -255,4 +268,6 @@ void loadLevel(int levelId) {
             gameMap[11][x] = TILE_BUSH_HOR;
         }
     }
+
+    randomizeSpawnTimers();
 }

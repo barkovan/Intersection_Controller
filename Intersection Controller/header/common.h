@@ -124,7 +124,7 @@ extern bool  yellowToGreen[MAP_HEIGHT][MAP_WIDTH];
 #define VEHICLE_MAX_SPEED       120.0f
 #define VEHICLE_ACCELERATION    200.0f
 #define VEHICLE_DECELERATION    300.0f
-#define VEHICLE_SPAWN_INTERVAL  3.0f
+#define VEHICLE_SPAWN_INTERVAL  9.0f
 
 typedef struct Vehicle {
     float x, y;

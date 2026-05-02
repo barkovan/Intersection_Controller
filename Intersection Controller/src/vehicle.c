@@ -293,12 +293,18 @@ void spawnLogic(float dt) {
         for (int x = 0; x < MAP_WIDTH; x++) {
             if (gameMap[y][x] == TILE_SPAWN) {
                 spawnTimers[y][x] += dt;
-                if (spawnTimers[y][x] >= VEHICLE_SPAWN_INTERVAL) {
+                float spawnInterval = (currentLevel == 0) ? 3.0f : VEHICLE_SPAWN_INTERVAL;
+                if (spawnTimers[y][x] >= spawnInterval) {
                     float targetX = (float)x * 40.0f + 20.0f;
                     float targetY = (float)y * 40.0f + 20.0f;
                     if (isSpawnAreaClear(targetX, targetY)) {
-                        createVehicle(targetX, targetY); // Создаем динамически
-                        spawnTimers[y][x] = 0.0f;
+                        createVehicle(targetX, targetY);
+                        if (currentLevel == 0) {
+                            spawnTimers[y][x] = 0.0f;
+                        }
+                        else {
+                            spawnTimers[y][x] = 2.0f + (float)rand() / (float)RAND_MAX * (VEHICLE_SPAWN_INTERVAL - 2.0f);
+                        }
                     }
                 }
             }
