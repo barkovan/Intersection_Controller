@@ -225,6 +225,13 @@ int main(int argc, char** argv) {
         limit_fps(60);
     }
 
+    saveGame("save.dat");
+
+    if (glfwWindowShouldClose(window)) {
+        FILE* flag = fopen("normal_exit.flag", "w");
+        if (flag) fclose(flag);
+    }
+
     // Очистка шрифтов
     if (fontBaseTitle) glDeleteLists(fontBaseTitle, 256);
     if (fontBase)      glDeleteLists(fontBase, 256);

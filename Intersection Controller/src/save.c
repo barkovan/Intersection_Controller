@@ -13,6 +13,7 @@ void saveGame(const char* filename) {
     // 1. Сохраняем общие параметры
     save.level = currentLevel;
     save.gameTimer = gameTimer;
+    save.carsPassed = carsPassedCount;
 
     // 2. Копируем карту и таймеры
     memcpy(save.map, gameMap, sizeof(gameMap));
@@ -57,6 +58,7 @@ bool loadGame(const char* filename) {
     // 2. Восстанавливаем общие параметры и ставим паузу
     currentLevel = save.level;
     gameTimer = save.gameTimer;
+    carsPassedCount = save.carsPassed;
     isPauseMode = 1;
 
     // 3. Восстанавливаем карту

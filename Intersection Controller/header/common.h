@@ -149,6 +149,7 @@ extern Vehicle* vehicleList;
 typedef struct {
     int level;
     float gameTimer;
+    int carsPassed;
     int map[MAP_HEIGHT][MAP_WIDTH];
     float trafficTimer[MAP_HEIGHT][MAP_WIDTH];
     bool  yellowToGreenMap[MAP_HEIGHT][MAP_WIDTH];
