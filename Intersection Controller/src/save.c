@@ -10,17 +10,17 @@ void saveGame(const char* filename) {
     GameSave save;
     memset(&save, 0, sizeof(GameSave));
 
-    // 1. Сохраняем общие параметры
+    // 1. РЎРѕС…СЂР°РЅСЏРµРј РѕР±С‰РёРµ РїР°СЂР°РјРµС‚СЂС‹
     save.level = currentLevel;
     save.pauseMode = isPauseMode;
 
-    // 2. Копируем карту и таймеры[cite: 36, 41]
+    // 2. РљРѕРїРёСЂСѓРµРј РєР°СЂС‚Сѓ Рё С‚Р°Р№РјРµСЂС‹
     memcpy(save.map, gameMap, sizeof(gameMap));
     memcpy(save.trafficTimer, trafficLightTimer, sizeof(trafficLightTimer));
     memcpy(save.yellowToGreenMap, yellowToGreen, sizeof(yellowToGreen));
     memcpy(save.spawnTimersMap, spawnTimers, sizeof(spawnTimers));
 
-    // 3. Сохраняем машины (не более MAX_VEHICLES)
+    // 3. РЎРѕС…СЂР°РЅСЏРµРј РјР°С€РёРЅС‹ (РЅРµ Р±РѕР»РµРµ MAX_VEHICLES)
     int count = 0;
     Vehicle* curr = vehicleList; //
     while (curr != NULL && count < MAX_VEHICLES) {
@@ -51,22 +51,22 @@ bool loadGame(const char* filename) {
     }
     fclose(f);
 
-    // 1. Очищаем текущее состояние[cite: 40]
+    // 1. РћС‡РёС‰Р°РµРј С‚РµРєСѓС‰РµРµ СЃРѕСЃС‚РѕСЏРЅРёРµ
     clearAllVehicles();
 
-    // 2. Восстанавливаем общие параметры[cite: 41]
+    // 2. Р’РѕСЃСЃС‚Р°РЅР°РІР»РёРІР°РµРј РѕР±С‰РёРµ РїР°СЂР°РјРµС‚СЂС‹
     currentLevel = save.level;
     isPauseMode = save.pauseMode;
 
-    // 3. Восстанавливаем карту[cite: 41]
+    // 3. Р’РѕСЃСЃС‚Р°РЅР°РІР»РёРІР°РµРј РєР°СЂС‚Сѓ
     memcpy(gameMap, save.map, sizeof(gameMap));
     memcpy(trafficLightTimer, save.trafficTimer, sizeof(trafficLightTimer));
     memcpy(yellowToGreen, save.yellowToGreenMap, sizeof(yellowToGreen));
     memcpy(spawnTimers, save.spawnTimersMap, sizeof(spawnTimers));
 
-    // 4. ГЛАВНОЕ: Пересоздаем список машин[cite: 40]
+    // 4. Р“Р›РђР’РќРћР•: РџРµСЂРµСЃРѕР·РґР°РµРј СЃРїРёСЃРѕРє РјР°С€РёРЅ
     for (int i = 0; i < save.vehicleCount; i++) {
-        // Создаем новый узел списка[cite: 40]
+        // РЎРѕР·РґР°РµРј РЅРѕРІС‹Р№ СѓР·РµР» СЃРїРёСЃРєР°
         Vehicle* v = createVehicle(save.vehicles[i].x, save.vehicles[i].y);
         if (v) {
             v->speed = save.vehicles[i].speed;
