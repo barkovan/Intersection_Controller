@@ -1,4 +1,5 @@
 #include "../header/levels.h"
+#include "../header/vehicle.h"
 #include "../header/common.h"
 
 #include <stdlib.h> 

@@ -12,7 +12,7 @@ void saveGame(const char* filename) {
 
     // 1. Сохраняем общие параметры
     save.level = currentLevel;
-    save.pauseMode = isPauseMode;
+    save.gameTimer = gameTimer;
 
     // 2. Копируем карту и таймеры
     memcpy(save.map, gameMap, sizeof(gameMap));
@@ -54,9 +54,10 @@ bool loadGame(const char* filename) {
     // 1. Очищаем текущее состояние
     clearAllVehicles();
 
-    // 2. Восстанавливаем общие параметры
+    // 2. Восстанавливаем общие параметры и ставим паузу
     currentLevel = save.level;
-    isPauseMode = save.pauseMode;
+    gameTimer = save.gameTimer;
+    isPauseMode = 1;
 
     // 3. Восстанавливаем карту
     memcpy(gameMap, save.map, sizeof(gameMap));

@@ -163,6 +163,7 @@ void updateVehicles(float dt) {
 
         if (gx < 0 || gx >= MAP_WIDTH || gy < 0 || gy >= MAP_HEIGHT || gameMap[gy][gx] == TILE_GRASS) {
             deleteVehicle(v);
+            carsPassedCount++;
             v = nextVehicle;
             continue;
         }

@@ -74,8 +74,14 @@ float spawnTimers[MAP_HEIGHT][MAP_WIDTH] = { 0 };
 float trafficLightTimer[MAP_HEIGHT][MAP_WIDTH] = { 0.0 };
 bool yellowToGreen[MAP_HEIGHT][MAP_WIDTH] = { false };
 
-// Время
+// Время и таймер
 float deltaTime = 0.0f;
+
+float gameTimer = 60.0f;
+bool isTimerRunning = true;
+
+// Кол-во проехавших машин
+int carsPassedCount = 0;
 
 // Размеры окна (пока фиксированы)
 int wWidth = 1280, wHeight = 720;
@@ -198,10 +204,19 @@ int main(int argc, char** argv) {
         deltaTime = (float)(currentTime - lastTime);
         lastTime = currentTime;
 
-        if (currentState == STATE_SIMULATION && !isPauseMode) {
+        if (currentState == STATE_SIMULATION && !isPauseMode && isTimerRunning) {
             updateVehicles(deltaTime);
             spawnLogic(deltaTime);
             updateTrafficLights();
+
+            if (gameTimer > 0.0f) {
+                gameTimer -= deltaTime;
+                if (gameTimer < 0.0f) {
+                    gameTimer = 0.0f;
+                    isTimerRunning = false;
+                }
+
+            }
         }
 
         render();

@@ -59,6 +59,11 @@ extern int mouseX, mouseY;
 extern int currentLevel;
 extern int isPauseMode;
 
+extern float gameTimer; 
+extern bool isTimerRunning;
+
+extern int carsPassedCount;
+
 // Шрифты
 extern GLuint fontBaseTitle;
 extern GLuint fontBase;
@@ -143,7 +148,7 @@ extern Vehicle* vehicleList;
 // Структура для сохранения
 typedef struct {
     int level;
-    int pauseMode;   // сохраняем состояние паузы
+    float gameTimer;
     int map[MAP_HEIGHT][MAP_WIDTH];
     float trafficTimer[MAP_HEIGHT][MAP_WIDTH];
     bool  yellowToGreenMap[MAP_HEIGHT][MAP_WIDTH];

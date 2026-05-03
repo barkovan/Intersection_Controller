@@ -73,6 +73,8 @@ void mouse_button_callback(GLFWwindow* w, int button, int action, int mods) {
                 }
 
                 loadLevel(currentLevel);
+                carsPassedCount = 0; // Сброс счетчика
+                gameTimer = 60.0f;
 
                 currentState = STATE_SIMULATION;
                 return;

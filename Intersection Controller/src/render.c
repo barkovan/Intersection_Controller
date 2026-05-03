@@ -623,6 +623,23 @@ void render(void) {
             glColor3f(1.0f, 1.0f, 1.0f);
             drawText(fontBase, 30, 150, brushText);
         }
+
+        // Таймер
+        char timerText[32];
+        int minutes = (int)gameTimer / 60;
+        int seconds = (int)gameTimer % 60;
+
+        sprintf(timerText, "TIME: %02d:%02d", minutes, seconds);
+
+        glColor3f(1.0f, 1.0f, 1.0f);
+        drawText(fontBase, 1025, 30, timerText);
+
+        // Счетчик проехавших машин
+        char statsText[32];
+        sprintf(statsText, "CARS PASSED: %d", carsPassedCount);
+
+        glColor3f(1.0f, 1.0f, 1.0f);
+        drawText(fontBase, 1025, 60, statsText);
     }
     else if (currentState == STATE_HELP) {
         // Фоновая клякса
