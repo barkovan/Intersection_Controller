@@ -30,6 +30,12 @@
     <ClCompile Include="src\vehicle.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\levels.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\save.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="header\common.h">
@@ -42,6 +48,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="header\vehicle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="header\levels.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -137,4 +137,27 @@ typedef struct Vehicle {
 
 extern Vehicle* vehicleList;
 
+// Для сохранения состояния игры
+#define MAX_VEHICLES 20
+
+// Структура для сохранения
+typedef struct {
+    int level;
+    int pauseMode;   // сохраняем состояние паузы
+    int map[MAP_HEIGHT][MAP_WIDTH];
+    float trafficTimer[MAP_HEIGHT][MAP_WIDTH];
+    bool  yellowToGreenMap[MAP_HEIGHT][MAP_WIDTH];
+    float spawnTimersMap[MAP_HEIGHT][MAP_WIDTH];
+    int vehicleCount;
+    struct {
+        float x, y;
+        float speed;
+        int dirX, dirY;
+        int canTurn;
+    } vehicles[MAX_VEHICLES];
+} GameSave;
+
+void saveGame(const char* filename);
+bool loadGame(const char* filename);
+
 #endif // COMMON_H

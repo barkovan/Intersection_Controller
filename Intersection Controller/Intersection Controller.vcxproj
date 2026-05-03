@@ -144,6 +144,7 @@
     <ClCompile Include="src\levels.c" />
     <ClCompile Include="src\main.c" />
     <ClCompile Include="src\render.c" />
+    <ClCompile Include="src\save.c" />
     <ClCompile Include="src\vehicle.c" />
   </ItemGroup>
   <ItemGroup>

@@ -7,7 +7,6 @@ void randomizeSpawnTimers(void) {
     for (int y = 0; y < MAP_HEIGHT; y++) {
         for (int x = 0; x < MAP_WIDTH; x++) {
             if (gameMap[y][x] == TILE_SPAWN) {
-                // случайное значение от 0 до VEHICLE_SPAWN_INTERVAL
                 spawnTimers[y][x] = 2.0f + (float)rand() / (float)RAND_MAX * (VEHICLE_SPAWN_INTERVAL - 2.0f);
             }
         }
@@ -222,6 +221,7 @@ void loadLevel(int levelId) {
 
         // 5. Светофоры
         gameMap[9][9] = TILE_TRAFFIC_LIGHT_GREEN; // Перед левым перекрестком
+        gameMap[10][11] = TILE_TRAFFIC_LIGHT_GREEN;
         gameMap[8][24] = TILE_TRAFFIC_LIGHT_RED;  // Перед правым (на основном пути)
 
         // 6. Спавнеры (точки появления машин)

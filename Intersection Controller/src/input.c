@@ -1,6 +1,7 @@
 #include "../header/common.h"
 #include "../header/input.h"
 #include "../header/levels.h"
+#include "../header/vehicle.h"
 #include <stdio.h>
 
 void initButtons(void) {
@@ -40,10 +41,17 @@ void mouse_button_callback(GLFWwindow* w, int button, int action, int mods) {
         for (int i = 0; i < 5; i++) {
             if (mouseX > buttons[i].x && mouseX < buttons[i].x + buttons[i].width &&
                 mouseY > buttons[i].y && mouseY < buttons[i].y + buttons[i].height) {
-
-                if (i == 0 || i == 1) {
+                if (i == 0) {
                     currentState = STATE_LEVEL_SELECT;
                     initLevelButtons();
+                }
+                else if (i == 1) { // Load Saved Game
+                    if (loadGame("save.dat")) {
+                        currentState = STATE_SIMULATION;
+                    }
+                    else {
+                        printf("No save file found.\n");
+                    }
                 }
                 else if (i == 2) currentState = STATE_HIGHSCORES;
                 else if (i == 3) currentState = STATE_HELP;
@@ -112,7 +120,12 @@ void mouse_button_callback(GLFWwindow* w, int button, int action, int mods) {
 void key_callback(GLFWwindow* w, int key, int scancode, int action, int mods) {
     if (action != GLFW_PRESS) return;
 
-    if (key == GLFW_KEY_ESCAPE) currentState = STATE_MENU;
+    if (key == GLFW_KEY_ESCAPE) {
+        if (currentState == STATE_SIMULATION) {
+            saveGame("save.dat");
+        }
+        currentState = STATE_MENU;
+    }
     if (key == GLFW_KEY_F8) showDebugGrid = !showDebugGrid; // Дебаг сетка
 
     // Переключение режима по пробелу
