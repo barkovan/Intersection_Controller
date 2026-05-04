@@ -71,6 +71,10 @@ int currentBrush = TILE_ROAD_RIGHT;
 
 // Таймеры спавнеров
 float spawnTimers[MAP_HEIGHT][MAP_WIDTH] = { 0 };
+int isBonusPending[MAP_HEIGHT][MAP_WIDTH] = { 0 };
+
+float spawnMinDelay[MAP_HEIGHT][MAP_WIDTH] = { 0 };
+float spawnMaxDelay[MAP_HEIGHT][MAP_WIDTH] = { 0 };
 
 // Светофоры
 float trafficLightTimer[MAP_HEIGHT][MAP_WIDTH] = { 0.0 };
@@ -222,8 +226,14 @@ int main(int argc, char** argv) {
                 autoSaveTimer = 0.0f;
             }
 
+            int targetCars;
+            if (currentLevel == 1) targetCars = 20;      // Easy
+            if (currentLevel == 2) targetCars = 30;
+            if (currentLevel == 3) targetCars = 40;
+            else targetCars = 30;
+
             if (!isEndgame) gameTimer += deltaTime;
-            if (lives < 1 || carsPassedCount == 5) {
+            if (lives < 1 || carsPassedCount >= targetCars) {
                 isEndgame = 1;
                 initEndgameButtons();
             }

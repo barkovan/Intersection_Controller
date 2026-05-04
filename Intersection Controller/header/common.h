@@ -95,6 +95,7 @@ extern int currentBrush; // текущая плитка
 #define YELLOW_DURATION 1.0   // длительность жёлтого сигнала (сек)
 
 extern float spawnTimers[MAP_HEIGHT][MAP_WIDTH]; // таймеры спавнеров
+extern int isBonusPending[MAP_HEIGHT][MAP_WIDTH];
 
 typedef enum {
     TILE_GRASS = 0,
@@ -133,7 +134,9 @@ extern bool  yellowToGreen[MAP_HEIGHT][MAP_WIDTH];
 #define VEHICLE_MAX_SPEED       120.0f
 #define VEHICLE_ACCELERATION    200.0f
 #define VEHICLE_DECELERATION    300.0f
-#define VEHICLE_SPAWN_INTERVAL  9.0f
+
+extern float spawnMinDelay[MAP_HEIGHT][MAP_WIDTH];
+extern float spawnMaxDelay[MAP_HEIGHT][MAP_WIDTH];
 
 typedef struct Vehicle {
     float x, y;

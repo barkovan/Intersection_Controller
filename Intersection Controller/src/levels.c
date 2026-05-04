@@ -4,16 +4,6 @@
 
 #include <stdlib.h> 
 
-void randomizeSpawnTimers(void) {
-    for (int y = 0; y < MAP_HEIGHT; y++) {
-        for (int x = 0; x < MAP_WIDTH; x++) {
-            if (gameMap[y][x] == TILE_SPAWN) {
-                spawnTimers[y][x] = 2.0f + (float)rand() / (float)RAND_MAX * (VEHICLE_SPAWN_INTERVAL - 2.0f);
-            }
-        }
-    }
-}
-
 void loadLevel(int levelId) {
     for (int y = 0; y < MAP_HEIGHT; y++) {
         for (int x = 0; x < MAP_WIDTH; x++) {
@@ -22,6 +12,13 @@ void loadLevel(int levelId) {
     }
 
     clearAllVehicles();
+
+    // Сброс таймеров спавнеров
+    for (int y = 0; y < MAP_HEIGHT; y++) {
+        for (int x = 0; x < MAP_WIDTH; x++) {
+            spawnTimers[y][x] = 0.0f;
+        }
+    }
 
     // генерация уровней
     if (levelId == 1) { // easy
@@ -53,7 +50,12 @@ void loadLevel(int levelId) {
 
         // спавнеры машин
         gameMap[17][16] = TILE_SPAWN;     // Снизу (едут вверх к перекрестку)
+        spawnMinDelay[17][16] = 4.5f;
+        spawnMaxDelay[17][16] = 5.5f;
+
         gameMap[9][0] = TILE_SPAWN;      // Слева (едут направо)
+        spawnMinDelay[9][0] = 2.0f;
+        spawnMaxDelay[9][0] = 5.0f;
 
         // текстурки
         gameMap[3][5] = TILE_HOUSE;
@@ -146,8 +148,16 @@ void loadLevel(int levelId) {
 
         // Три спавнера
         gameMap[9][0] = TILE_SPAWN; // Машины слева направо
+        spawnMinDelay[9][0] = 2.0f;
+        spawnMaxDelay[9][0] = 4.0f;
+
         gameMap[17][16] = TILE_SPAWN; // Машины снизу вверх
+        spawnMinDelay[17][16] = 2.5f;
+        spawnMaxDelay[17][16] = 4.0f;
+
         gameMap[0][15] = TILE_SPAWN; // Машины сверху вниз
+        spawnMinDelay[0][15] = 3.0f;
+        spawnMaxDelay[0][15] = 4.5f;
 
         // Дома
         gameMap[3][5] = TILE_HOUSE_BROWN;
@@ -227,9 +237,20 @@ void loadLevel(int levelId) {
 
         // 6. Спавнеры (точки появления машин)
         gameMap[9][0] = TILE_SPAWN;      // Въезд слева
+        spawnMinDelay[9][0] = 2.0f;
+        spawnMaxDelay[9][0] = 4.5f;
+
         gameMap[8][31] = TILE_SPAWN;     // Въезд справа
+        spawnMinDelay[8][31] = 2.0f;
+        spawnMaxDelay[8][31] = 4.5f;
+
         gameMap[17][11] = TILE_SPAWN;    // Въезд снизу (только для левой дороги)
+        spawnMinDelay[17][11] = 3.5f;
+        spawnMaxDelay[17][11] = 6.0f;
+
         gameMap[0][22] = TILE_SPAWN;     // Въезд сверху (для обеих дорог)
+        spawnMinDelay[0][22] = 3.0f;
+        spawnMaxDelay[0][22] = 4.5f;
 
         gameMap[1][2] = TILE_HOUSE_BROWN;
 
@@ -269,6 +290,4 @@ void loadLevel(int levelId) {
             gameMap[11][x] = TILE_BUSH_HOR;
         }
     }
-
-    randomizeSpawnTimers();
 }

@@ -276,10 +276,7 @@ void updateVehicles(float dt) {
 
 bool isSpawnAreaClear(float sx, float sy) {
     float safeDistSq = 65.0f * 65.0f;
-    Vehicle* curr =
-
-
-        vehicleList;
+    Vehicle* curr = vehicleList;
     while (curr != NULL) {
         float dx = curr->x - sx;
         float dy = curr->y - sy;
@@ -294,18 +291,39 @@ void spawnLogic(float dt) {
     for (int y = 0; y < MAP_HEIGHT; y++) {
         for (int x = 0; x < MAP_WIDTH; x++) {
             if (gameMap[y][x] == TILE_SPAWN) {
-                spawnTimers[y][x] += dt;
-                float spawnInterval = (currentLevel == 0) ? 3.0f : VEHICLE_SPAWN_INTERVAL;
-                if (spawnTimers[y][x] >= spawnInterval) {
+                // Уменьшаем таймер
+                spawnTimers[y][x] -= dt;
+
+                // Если время ожидания вышло
+                if (spawnTimers[y][x] <= 0.0f) {
                     float targetX = (float)x * 40.0f + 20.0f;
                     float targetY = (float)y * 40.0f + 20.0f;
+
                     if (isSpawnAreaClear(targetX, targetY)) {
                         createVehicle(targetX, targetY);
-                        if (currentLevel == 0) {
-                            spawnTimers[y][x] = 0.0f;
+
+                        float minD = spawnMinDelay[y][x];
+                        float maxD = spawnMaxDelay[y][x];
+
+                        // Проверяем уровень и координаты (вертикальная дорога)
+                        if (currentLevel == 1 && y == 17 && x == 16) {
+
+                            // Если эта машина не была бонуской, даем шанс на додеп
+                            if (isBonusPending[y][x] == 0 && (rand() % 100) < 50) {
+                                spawnTimers[y][x] = 1.0f;
+                                isBonusPending[y][x] = 1; // Помечаем, что бонус выдан
+                            }
+                            else {
+                                // Если бонус не выпал или это уже был бонус — ставим обычную задержку
+                                spawnTimers[y][x] = minD + (float)rand() / RAND_MAX * (maxD - minD);
+                                isBonusPending[y][x] = 0; // Сбрасываем флаг
+                            }
+
                         }
                         else {
-                            spawnTimers[y][x] = 2.0f + (float)rand() / (float)RAND_MAX * (VEHICLE_SPAWN_INTERVAL - 2.0f);
+                            // Обычная логика для остальных случаев
+                            spawnTimers[y][x] = (currentLevel == 0) ? 3.0f : (minD + (float)rand() / RAND_MAX * (maxD - minD));
+                            isBonusPending[y][x] = 0;
                         }
                     }
                 }
