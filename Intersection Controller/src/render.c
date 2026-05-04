@@ -712,6 +712,58 @@ void render(void) {
             else drawDefeatScreen();
         }
     }
+    else if (currentState == STATE_HIGHSCORES) {
+        // Фон
+        if (helpBgTex != 0) {
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            glEnable(GL_TEXTURE_2D);
+            glBindTexture(GL_TEXTURE_2D, helpBgTex);
+            glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+            float bgX = GX(-3), bgY = GY(-4), bgW = GX(38), bgH = GY(25);
+            glBegin(GL_QUADS);
+            glTexCoord2f(0, 0); glVertex2f(bgX, bgY);
+            glTexCoord2f(1, 0); glVertex2f(bgX + bgW, bgY);
+            glTexCoord2f(1, 1); glVertex2f(bgX + bgW, bgY + bgH);
+            glTexCoord2f(0, 1); glVertex2f(bgX, bgY + bgH);
+            glEnd();
+            glDisable(GL_TEXTURE_2D);
+        }
+
+        // Заголовок (таким же шрифтом, как "HOW TO PLAY")
+        glColor3f(1.0f, 1.0f, 0.3f);
+        drawText(fontBaseHov, GX(13), GY(2), "HIGH SCORES");
+
+        const char* levelNames[] = { "EASY", "MEDIUM", "HARD" };
+        // Колонки чуть правее
+        float colX[3] = { GX(3.5), GX(14), GX(25) };
+        float colY = GY(6);
+
+        for (int level = 0; level < 3; level++) {
+            // Заголовок уровня
+            glColor3f(1.0f, 0.7f, 0.3f);
+            drawText(fontBaseHov, colX[level], colY, levelNames[level]);
+
+            // Рекорды
+            glColor3f(0.9f, 0.9f, 0.9f);
+            ScoreNode* curr = highScoresList[level];
+            int place = 1;
+
+            if (curr == NULL) {
+                drawText(fontBase, colX[level], colY + GY(1.5f), "No records");
+            }
+
+            while (curr != NULL && place <= 3) {
+                char scoreStr[64];
+                int mins = (int)curr->time.timeSeconds / 60;
+                int secs = (int)curr->time.timeSeconds % 60;
+                sprintf(scoreStr, "%d. %02d:%02d", place, mins, secs);
+                drawText(fontBase, colX[level], colY + GY(1.0f) * place, scoreStr);
+                curr = curr->next;
+                place++;
+            }
+        }
+    }
     else if (currentState == STATE_HELP) {
         // Фоновая клякса
         if (helpBgTex != 0) {

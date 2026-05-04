@@ -140,6 +140,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="GL\GLAD\src\glad.c" />
+    <ClCompile Include="src\highscores.c" />
     <ClCompile Include="src\input.c" />
     <ClCompile Include="src\levels.c" />
     <ClCompile Include="src\main.c" />

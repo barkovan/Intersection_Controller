@@ -125,6 +125,8 @@ void limit_fps(int target_fps) {
 int main(int argc, char** argv) {
     srand((unsigned int)time(NULL));
 
+    loadHighScores();
+
     glutInit(&argc, argv);
     glfwSetErrorCallback(error_callback);
 
@@ -230,12 +232,14 @@ int main(int argc, char** argv) {
 
             int targetCars;
             if (currentLevel == 1) targetCars = 20;      // Easy
-            if (currentLevel == 2) targetCars = 30;
-            if (currentLevel == 3) targetCars = 40;
+            else if (currentLevel == 2) targetCars = 30;
+            else if (currentLevel == 3) targetCars = 40;
             else targetCars = 30;
 
             if (!isEndgame) gameTimer += deltaTime;
             if (lives < 1 || carsPassedCount >= targetCars) {
+                addHighScore(currentLevel, gameTimer);
+                saveHighScores();
                 isEndgame = 1;
                 initEndgameButtons();
             }

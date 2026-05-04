@@ -177,4 +177,21 @@ typedef struct {
 void saveGame(const char* filename);
 bool loadGame(const char* filename);
 
+// HIGH SCORES 
+typedef union {
+    float timeSeconds;
+    int timeTicks;
+} TimeRecord;
+
+typedef struct ScoreNode {
+    TimeRecord time;
+    struct ScoreNode* next;
+} ScoreNode;
+
+extern ScoreNode* highScoresList[3];
+
+void addHighScore(int level, float time);
+void saveHighScores();
+void loadHighScores();
+
 #endif // COMMON_H
