@@ -216,6 +216,12 @@ int main(int argc, char** argv) {
             spawnLogic(deltaTime);
             updateTrafficLights();
 
+            autoSaveTimer += deltaTime;
+            if (autoSaveTimer >= 5.0f) {
+                saveGame("save.dat");
+                autoSaveTimer = 0.0f;
+            }
+
             if (!isEndgame) gameTimer += deltaTime;
             if (lives < 1 || carsPassedCount == 5) {
                 isEndgame = 1;
