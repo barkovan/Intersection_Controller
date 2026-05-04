@@ -237,7 +237,13 @@ int main(int argc, char** argv) {
             else targetCars = 30;
 
             if (!isEndgame) gameTimer += deltaTime;
-            if (lives < 1 || carsPassedCount >= targetCars) {
+
+            if (lives < 1) {
+                isEndgame = 1;
+                initEndgameButtons();
+            }
+
+            if (carsPassedCount >= targetCars) {
                 addHighScore(currentLevel, gameTimer);
                 saveHighScores();
                 isEndgame = 1;
