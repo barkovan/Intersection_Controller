@@ -20,7 +20,7 @@ typedef struct {
     float x, y;
     float width, height;
     const char* text;
-    const char* type;   // "Menu" или "Level"
+    const char* type;   // "Menu", "Level" или "Endgame"
 } Button;
 
 
@@ -28,7 +28,8 @@ typedef struct {
 extern GLuint uiButtonTex;        // обычная кнопка
 extern GLuint uiButtonHoverTex;   // кнопка при наведении
 extern GLuint titlePlateTex;      // клякса для заголовка меню
-extern GLuint helpBgTex;          // фоновая клякса для экрана справки
+extern GLuint helpBgTex;          // фоновая клякса (окно помощи)
+extern GLuint endgameBgTex;       // фоновая клякса (окно конца игры)
 extern GLuint carTex;             // текстура автомобиля
 
 
@@ -56,13 +57,15 @@ extern GameState currentState;
 extern GLFWwindow* window;
 
 extern int mouseX, mouseY;
+
 extern int currentLevel;
 extern int isPauseMode;
 
-extern float gameTimer; 
-extern bool isTimerRunning;
+extern float gameTimer; // таймер
+extern bool isEndgame;
 
-extern int carsPassedCount;
+extern int carsPassedCount; // количество проехавших машин
+extern int lives; // количество жизней
 
 // Шрифты
 extern GLuint fontBaseTitle;
@@ -72,6 +75,7 @@ extern GLuint fontBaseHov;
 // UI-элементы
 extern Button buttons[5];
 extern Button levelButtons[4];
+extern Button endgameButtons[2];
 extern float buttonScale[10];
 
 // Сетка
@@ -150,6 +154,7 @@ typedef struct {
     int level;
     float gameTimer;
     int carsPassed;
+    int lives;
     int map[MAP_HEIGHT][MAP_WIDTH];
     float trafficTimer[MAP_HEIGHT][MAP_WIDTH];
     bool  yellowToGreenMap[MAP_HEIGHT][MAP_WIDTH];

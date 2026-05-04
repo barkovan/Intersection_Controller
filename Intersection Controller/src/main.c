@@ -24,7 +24,7 @@ GLFWwindow* window = NULL;
 // Ввод
 int mouseX = 0, mouseY = 0;
 int currentLevel = 1;
-int isPauseMode = 1;          // 1 – редактор, 0 – симуляция
+int isPauseMode = 1;          // 1 – редактор/пауза, 0 – симуляция
 
 // Шрифты
 GLuint fontBaseTitle = 0;
@@ -34,6 +34,7 @@ GLuint fontBaseHov = 0;
 // UI
 Button buttons[5];
 Button levelButtons[4];
+Button endgameButtons[2];
 float buttonScale[10] = { 1.0f, 1.0f, 1.0f, 1.0f, 1.0f,
                           1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
 
@@ -42,6 +43,7 @@ GLuint uiButtonTex = 0;
 GLuint uiButtonHoverTex = 0;
 GLuint titlePlateTex = 0;
 GLuint helpBgTex = 0;
+GLuint endgameBgTex = 0;
 GLuint carTex = 0;
 
 
@@ -77,11 +79,12 @@ bool yellowToGreen[MAP_HEIGHT][MAP_WIDTH] = { false };
 // Время и таймер
 float deltaTime = 0.0f;
 
-float gameTimer = 60.0f;
-bool isTimerRunning = true;
+float gameTimer = 0.0f;
+bool isEndgame = false;
 
-// Кол-во проехавших машин
+// Кол-во проехавших машин и стартовые жизни
 int carsPassedCount = 0;
+int lives = 3;
 
 // Размеры окна (пока фиксированы)
 int wWidth = 1280, wHeight = 720;
@@ -163,6 +166,7 @@ int main(int argc, char** argv) {
     uiButtonHoverTex = loadTexture("assets/button_hover.png");
     titlePlateTex = loadTexture("assets/title_plate.png");
     helpBgTex = loadTexture("assets/help_bg.png");
+    endgameBgTex = loadTexture("assets/endgame_bg.png");
     carTex = loadTexture("assets/car.png");
 
     houseTex = loadTexture("assets/house.png");
@@ -204,18 +208,15 @@ int main(int argc, char** argv) {
         deltaTime = (float)(currentTime - lastTime);
         lastTime = currentTime;
 
-        if (currentState == STATE_SIMULATION && !isPauseMode && isTimerRunning) {
+        if (currentState == STATE_SIMULATION && !isPauseMode && !isEndgame) {
             updateVehicles(deltaTime);
             spawnLogic(deltaTime);
             updateTrafficLights();
 
-            if (gameTimer > 0.0f) {
-                gameTimer -= deltaTime;
-                if (gameTimer < 0.0f) {
-                    gameTimer = 0.0f;
-                    isTimerRunning = false;
-                }
-
+            if (!isEndgame) gameTimer += deltaTime;
+            if (lives < 1 || carsPassedCount == 5) {
+                isEndgame = 1;
+                initEndgameButtons();
             }
         }
 

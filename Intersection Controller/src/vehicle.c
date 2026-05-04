@@ -193,6 +193,7 @@ void updateVehicles(float dt) {
             crashOther = crashOther->next;
         }
         if (crashed) {
+            if (currentLevel != 0) lives--;
             v = nextVehicle;
             continue;
         }

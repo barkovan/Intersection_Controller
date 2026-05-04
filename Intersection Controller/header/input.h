@@ -6,6 +6,7 @@
 // Инициализация кнопок
 void initButtons(void);
 void initLevelButtons(void);
+void initEndgameButtons(void);
 
 // Callback функци ввода
 void cursor_position_callback(GLFWwindow* w, double x, double y);

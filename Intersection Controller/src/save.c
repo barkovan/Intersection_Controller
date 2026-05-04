@@ -14,6 +14,7 @@ void saveGame(const char* filename) {
     save.level = currentLevel;
     save.gameTimer = gameTimer;
     save.carsPassed = carsPassedCount;
+    save.lives = lives;
 
     // 2. Копируем карту и таймеры
     memcpy(save.map, gameMap, sizeof(gameMap));
@@ -59,6 +60,7 @@ bool loadGame(const char* filename) {
     currentLevel = save.level;
     gameTimer = save.gameTimer;
     carsPassedCount = save.carsPassed;
+    lives = save.lives;
     isPauseMode = 1;
 
     // 3. Восстанавливаем карту

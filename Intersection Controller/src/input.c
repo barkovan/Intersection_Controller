@@ -29,6 +29,15 @@ void initLevelButtons(void) {
     levelButtons[3] = (Button){ GX(10), GY(13), GX(12), GY(2), "Sandbox", "Level"};
 }
 
+void initEndgameButtons(void) {
+    // Инициализация кнопок при победе или поражении
+    float btnW = GX(4);
+    float btnH = GY(2);
+
+    endgameButtons[0] = (Button){ GX(11),  GY(9), btnW, btnH, "Restart", "Endgame" };
+    endgameButtons[1] = (Button){ GX(17),  GY(9), btnW, btnH, "Menu", "Endgame" };
+}
+
 void cursor_position_callback(GLFWwindow* w, double x, double y) {
     mouseX = (int)x;
     mouseY = (int)y;
@@ -73,8 +82,13 @@ void mouse_button_callback(GLFWwindow* w, int button, int action, int mods) {
                 }
 
                 loadLevel(currentLevel);
-                carsPassedCount = 0; // Сброс счетчика
-                gameTimer = 60.0f;
+
+                // Сброс счетчика, таймера и жизней
+                carsPassedCount = 0;
+                gameTimer = 0.0f;
+                lives = 3;
+                isPauseMode = 1;
+                isEndgame = 0;
 
                 currentState = STATE_SIMULATION;
                 return;
@@ -82,6 +96,26 @@ void mouse_button_callback(GLFWwindow* w, int button, int action, int mods) {
         }
     }
     else if (currentState == STATE_SIMULATION) {
+        if (isEndgame) {
+            for (int i = 0; i < 2; i++) {
+                if (mouseX > endgameButtons[i].x && mouseX < endgameButtons[i].x + endgameButtons[i].width &&
+                    mouseY > endgameButtons[i].y && mouseY < endgameButtons[i].y + endgameButtons[i].height) {
+                    if (i == 0) {
+                        // Restart
+                        carsPassedCount = 0;
+                        gameTimer = 0.0f;
+                        lives = 3;
+                        isPauseMode = 1;
+                        isEndgame = 0;
+                        clearAllVehicles();
+                    }
+                    else if (i == 1) {
+                        // Menu
+                        currentState = STATE_MENU;
+                    }
+                }
+            }
+        }
         if (action == GLFW_PRESS) {
             int gridX = mouseX / 40;
             int gridY = mouseY / 40;
@@ -131,7 +165,7 @@ void key_callback(GLFWwindow* w, int key, int scancode, int action, int mods) {
     if (key == GLFW_KEY_F8) showDebugGrid = !showDebugGrid; // Дебаг сетка
 
     // Переключение режима по пробелу
-    if (key == GLFW_KEY_SPACE) isPauseMode = !isPauseMode;
+    if (key == GLFW_KEY_SPACE && !isEndgame) isPauseMode = !isPauseMode;
 
     // Переключение выбора плитки
     if (key == GLFW_KEY_1) currentBrush = TILE_ROAD_RIGHT;

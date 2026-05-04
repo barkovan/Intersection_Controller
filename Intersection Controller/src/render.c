@@ -80,7 +80,6 @@ void buildBaseFontHov(void) {
 // Выводит текст в заданных экранных координатах
 void drawText(GLuint fontBase, float x, float y, const char* text) {
     if (!text) return;
-    glColor3f(1.0f, 1.0f, 1.0f);
     glRasterPos2f(x, y);
     glListBase(fontBase);
     glCallLists((GLsizei)strlen(text), GL_UNSIGNED_BYTE, text);
@@ -138,29 +137,30 @@ static void drawButton(const Button* btn, int index, int isHovered) {
 
 // Обновляет анимацию масштабирования кнопок при наведении
 static void updateButtons(void) {
+    int btns = 0;
+    Button* currentArray = buttons;
+
     if (currentState == STATE_MENU) {
-        for (int i = 0; i < 5; i++) {
-            int hovered = (mouseX > buttons[i].x && mouseX < buttons[i].x + buttons[i].width &&
-                           mouseY > buttons[i].y && mouseY < buttons[i].y + buttons[i].height);
-            if (hovered) {
-                buttonScale[i] += 0.09f;
-                if (buttonScale[i] > 1.16f) buttonScale[i] = 1.16f;
-            } else {
-                buttonScale[i] -= 0.085f;
-                if (buttonScale[i] < 1.0f) buttonScale[i] = 1.0f;
-            }
+        btns = 5;
+    } 
+    else if (currentState == STATE_LEVEL_SELECT) {
+        btns = 4;
+        currentArray = levelButtons;
+    }
+    else if (currentState == STATE_SIMULATION && isEndgame) {
+        btns = 2;
+        currentArray = endgameButtons;
+    }
+    for (int i = 0; i < btns; i++) {
+        int hovered = (mouseX > currentArray[i].x && mouseX < currentArray[i].x + currentArray[i].width &&
+            mouseY > currentArray[i].y && mouseY < currentArray[i].y + currentArray[i].height);
+        if (hovered) {
+            buttonScale[i] += 0.09f;
+            if (buttonScale[i] > 1.16f) buttonScale[i] = 1.16f;
         }
-    } else if (currentState == STATE_LEVEL_SELECT) {
-        for (int i = 0; i < 4; i++) {
-            int hovered = (mouseX > levelButtons[i].x && mouseX < levelButtons[i].x + levelButtons[i].width &&
-                           mouseY > levelButtons[i].y && mouseY < levelButtons[i].y + levelButtons[i].height);
-            if (hovered) {
-                buttonScale[i] += 0.09f;
-                if (buttonScale[i] > 1.19f) buttonScale[i] = 1.19f;
-            } else {
-                buttonScale[i] -= 0.085f;
-                if (buttonScale[i] < 1.0f) buttonScale[i] = 1.0f;
-            }
+        else {
+            buttonScale[i] -= 0.085f;
+            if (buttonScale[i] < 1.0f) buttonScale[i] = 1.0f;
         }
     }
 }
@@ -484,6 +484,68 @@ void updateTrafficLights(void) {
     }
 }
 
+// ========== ОКНА ПОБЕДЫ И ПОРАЖЕНИЯ ==========
+
+void drawEndGameOverlay(const char* title, bool isVictory) {
+    // Фоновая клякса
+    if (endgameBgTex != 0) {
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glEnable(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, endgameBgTex);
+        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+
+        // Растягиваем на всё окно
+        float bgX = GX(6.5);
+        float bgY = GY(2);
+        float bgW = GX(19);
+        float bgH = GY(12.5);
+
+        glBegin(GL_QUADS);
+        glTexCoord2f(0.0f, 0.0f); glVertex2f(bgX, bgY);
+        glTexCoord2f(1.0f, 0.0f); glVertex2f(bgX + bgW, bgY);
+        glTexCoord2f(1.0f, 1.0f); glVertex2f(bgX + bgW, bgY + bgH);
+        glTexCoord2f(0.0f, 1.0f); glVertex2f(bgX, bgY + bgH);
+        glEnd();
+
+        glDisable(GL_TEXTURE_2D);
+        glDisable(GL_BLEND);
+    }
+
+    // Кнопки
+    for (int i = 0; i < 2; i++) {
+        int hovered = (mouseX > endgameButtons[i].x && mouseX < endgameButtons[i].x + endgameButtons[i].width &&
+            mouseY > endgameButtons[i].y && mouseY < endgameButtons[i].y + endgameButtons[i].height);
+        drawButton(&endgameButtons[i], i, hovered);
+    }
+
+    // 3. Заголовок
+    if (isVictory) {
+        glColor3f(0.0f, 1.0f, 0.0f); // Зеленый для победы
+        drawText(fontBase, GX(13), GY(6.5), title);
+    }
+    else {
+        glColor3f(1.0f, 0.0f, 0.0f); // Красный для поражения
+        drawText(fontBase, GX(14.9), GY(6.5), title);
+    }
+
+    // 4. Дополнительная информация (для победы)
+    if (isVictory) {
+        char timeBuf[32];
+        int mins = (int)gameTimer / 60;
+        int secs = (int)gameTimer % 60;
+        sprintf(timeBuf, "Time spent: %02d:%02d", mins, secs);
+        glColor3f(1.0f, 1.0f, 1.0f);
+        drawText(fontBase, GX(13.5), GY(7.5), timeBuf);
+    }
+    
+    glDisable(GL_BLEND);
+}
+
+// Функции-обертки для вызова в главном render()
+void drawVictoryScreen() { drawEndGameOverlay("LEVEL COMPLETED", true); }
+void drawDefeatScreen() { drawEndGameOverlay("FAILED", false); }
+
 // ========== ГЛАВНЫЙ РЕНДЕР ==========
 
 void render(void) {
@@ -522,7 +584,7 @@ void render(void) {
         }
 
         // Заголовок текстом
-        glColor3f(1.0f, 1.0f, 0.3f);
+        glColor3f(1.0f, 1.0f, 1.0f);
         drawText(fontBaseTitle, GX(5.6f), GY(6.2f), "TRAFFIC SIMULATOR");
 
         // Кнопки меню
@@ -532,7 +594,7 @@ void render(void) {
             drawButton(&buttons[i], i, hovered);
         }
     } else if (currentState == STATE_LEVEL_SELECT) {
-        glColor3f(1.0f, 1.0f, 0.3f);
+        glColor3f(1.0f, 1.0f, 1.0f);
         drawText(fontBaseTitle, GX(2.8f), GY(3), "SELECT DIFFICULTY LEVEL");
         for (int i = 0; i < 4; i++) {
             int hovered = (mouseX > levelButtons[i].x && mouseX < levelButtons[i].x + levelButtons[i].width &&
@@ -623,23 +685,31 @@ void render(void) {
             glColor3f(1.0f, 1.0f, 1.0f);
             drawText(fontBase, 30, 150, brushText);
         }
+        else {
+            glColor3f(1.0f, 1.0f, 1.0f);
+            // Таймер
+            char timerText[32];
+            int minutes = (int)gameTimer / 60;
+            int seconds = (int)gameTimer % 60;
 
-        // Таймер
-        char timerText[32];
-        int minutes = (int)gameTimer / 60;
-        int seconds = (int)gameTimer % 60;
+            sprintf(timerText, "TIME: %02d:%02d", minutes, seconds);
+            drawText(fontBase, 1025, 30, timerText);
 
-        sprintf(timerText, "TIME: %02d:%02d", minutes, seconds);
+            // Счетчик проехавших машин
+            char statsText[32];
+            sprintf(statsText, "CARS PASSED: %d", carsPassedCount);
+            drawText(fontBase, 1025, 60, statsText);
 
-        glColor3f(1.0f, 1.0f, 1.0f);
-        drawText(fontBase, 1025, 30, timerText);
+            // Счетчик жизней
+            sprintf(statsText, "LIVES: %d", lives);
+            drawText(fontBase, 1025, 90, statsText);
+        }
 
-        // Счетчик проехавших машин
-        char statsText[32];
-        sprintf(statsText, "CARS PASSED: %d", carsPassedCount);
-
-        glColor3f(1.0f, 1.0f, 1.0f);
-        drawText(fontBase, 1025, 60, statsText);
+        // Конец игры
+        if (isEndgame) {
+            if (lives > 0) drawVictoryScreen();
+            else drawDefeatScreen();
+        }
     }
     else if (currentState == STATE_HELP) {
         // Фоновая клякса
