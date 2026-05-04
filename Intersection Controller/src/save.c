@@ -72,7 +72,8 @@ bool loadGame(const char* filename) {
     // 4. ГЛАВНОЕ: Пересоздаем список машин
     for (int i = 0; i < save.vehicleCount; i++) {
         // Создаем новый узел списка
-        Vehicle* v = createVehicle(save.vehicles[i].x, save.vehicles[i].y);
+        GLuint tex = carTextures[rand() % carTexCount];
+        Vehicle* v = createVehicle(save.vehicles[i].x, save.vehicles[i].y, tex);
         if (v) {
             v->speed = save.vehicles[i].speed;
             v->dirX = save.vehicles[i].dirX;

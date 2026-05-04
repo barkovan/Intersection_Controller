@@ -9,7 +9,7 @@ Vehicle* vehicleList = NULL;
 // --- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ДЛЯ СПИСКА ---
 
 // Добавление новой машины в начало списка
-Vehicle* createVehicle(float x, float y) {
+Vehicle* createVehicle(float x, float y, GLuint texID) {
     Vehicle* newV = (Vehicle*)malloc(sizeof(Vehicle));
     if (!newV) return NULL;
 
@@ -19,6 +19,7 @@ Vehicle* createVehicle(float x, float y) {
     newV->dirX = 0;
     newV->dirY = 0;
     newV->canTurn = 1;
+    newV->texID = texID;
 
     // Вставка в начало двусвязного списка
     newV->prev = NULL;
@@ -300,7 +301,8 @@ void spawnLogic(float dt) {
                     float targetY = (float)y * 40.0f + 20.0f;
 
                     if (isSpawnAreaClear(targetX, targetY)) {
-                        createVehicle(targetX, targetY);
+                        GLuint tex = carTextures[rand() % carTexCount];
+                        createVehicle(targetX, targetY, tex);
 
                         float minD = spawnMinDelay[y][x];
                         float maxD = spawnMaxDelay[y][x];

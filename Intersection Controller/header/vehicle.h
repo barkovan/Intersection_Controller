@@ -3,7 +3,7 @@
 
 #include "common.h"
 
-Vehicle* createVehicle(float x, float y);
+Vehicle* createVehicle(float x, float y, GLuint texID);
 void deleteVehicle(Vehicle* v);
 void clearAllVehicles(void);
 

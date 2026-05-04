@@ -445,7 +445,7 @@ void drawVehicle(Vehicle* v) {
     glRotatef(angle - 90.0f, 0.0f, 0.0f, 1.0f);
 
     glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, carTex);
+    glBindTexture(GL_TEXTURE_2D, v->texID);
     glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
     float length = 55.0f;

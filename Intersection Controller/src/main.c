@@ -44,8 +44,9 @@ GLuint uiButtonHoverTex = 0;
 GLuint titlePlateTex = 0;
 GLuint helpBgTex = 0;
 GLuint endgameBgTex = 0;
-GLuint carTex = 0;
 
+GLuint carTextures[2] = { 0 };
+int carTexCount = 0;
 
 GLuint houseTex = 0;
 GLuint houseBrownTex = 0;
@@ -174,7 +175,10 @@ int main(int argc, char** argv) {
     titlePlateTex = loadTexture("assets/title_plate.png");
     helpBgTex = loadTexture("assets/help_bg.png");
     endgameBgTex = loadTexture("assets/endgame_bg.png");
-    carTex = loadTexture("assets/car.png");
+
+    carTextures[0] = loadTexture("assets/car.png");
+    carTextures[1] = loadTexture("assets/car2.png");
+    carTexCount = 2;
 
     houseTex = loadTexture("assets/house.png");
     houseBrownTex = loadTexture("assets/house_brown.png");
@@ -193,8 +197,6 @@ int main(int argc, char** argv) {
     bushLeftupTex = loadTexture("assets/bush_leftup.png");
     bushRightupTex = loadTexture("assets/bush_rightup.png");
     bushRightdownTex = loadTexture("assets/bush_rightdown.png");
-
-    if (carTex == 0) printf("Error: failed to load car texture\n");
 
     // Кнопки
     initButtons();

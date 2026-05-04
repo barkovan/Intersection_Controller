@@ -30,8 +30,10 @@ extern GLuint uiButtonHoverTex;   // кнопка при наведении
 extern GLuint titlePlateTex;      // клякса для заголовка меню
 extern GLuint helpBgTex;          // фоновая клякса (окно помощи)
 extern GLuint endgameBgTex;       // фоновая клякса (окно конца игры)
-extern GLuint carTex;             // текстура автомобиля
 
+
+extern GLuint carTextures[2];     // тектуры машин
+extern int carTexCount;
 
 extern GLuint houseTex;           // текстура дома
 extern GLuint houseBrownTex;
@@ -143,6 +145,7 @@ typedef struct Vehicle {
     float speed;
     int dirX, dirY;
     int canTurn;
+    GLuint texID;
     struct Vehicle* next;
     struct Vehicle* prev;
 } Vehicle;
