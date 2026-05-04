@@ -509,8 +509,11 @@ void drawEndGameOverlay(const char* title, bool isVictory) {
         glEnd();
 
         glDisable(GL_TEXTURE_2D);
-        glDisable(GL_BLEND);
     }
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
     // Кнопки
     for (int i = 0; i < 2; i++) {
@@ -538,8 +541,6 @@ void drawEndGameOverlay(const char* title, bool isVictory) {
         glColor3f(1.0f, 1.0f, 1.0f);
         drawText(fontBase, GX(13.5), GY(7.5), timeBuf);
     }
-    
-    glDisable(GL_BLEND);
 }
 
 // Функции-обертки для вызова в главном render()
