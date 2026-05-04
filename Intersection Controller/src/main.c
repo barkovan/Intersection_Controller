@@ -92,6 +92,9 @@ int wWidth = 1280, wHeight = 720;
 // Отладка
 int showDebugGrid = 0;
 
+// Для автосохранения
+float autoSaveTimer = 0.0f;
+
 // ========== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ==========
 
 // Колбэк ошибок GLFW
@@ -227,11 +230,6 @@ int main(int argc, char** argv) {
     }
 
     saveGame("save.dat");
-
-    if (glfwWindowShouldClose(window)) {
-        FILE* flag = fopen("normal_exit.flag", "w");
-        if (flag) fclose(flag);
-    }
 
     // Очистка шрифтов
     if (fontBaseTitle) glDeleteLists(fontBaseTitle, 256);
