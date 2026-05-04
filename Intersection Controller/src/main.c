@@ -9,6 +9,7 @@
 #include "../header/render.h"
 #include "../header/input.h"
 #include "../header/vehicle.h"
+#include "../resource.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -125,6 +126,11 @@ void limit_fps(int target_fps) {
 int main(int argc, char** argv) {
     srand((unsigned int)time(NULL));
 
+    // Скрытие консольного окна
+    HWND hWnd = GetConsoleWindow();
+    ShowWindow(hWnd, SW_HIDE);
+
+
     loadHighScores();
 
     glutInit(&argc, argv);
@@ -149,6 +155,19 @@ int main(int argc, char** argv) {
         printf("Failed to initialize GLAD\n");
         glfwTerminate();
         return -1;
+    }
+
+    // Установка иконки
+    HWND hwnd = FindWindowA("GLFW30", "Traffic Simulator");
+
+    if (hwnd) {
+        // Загружаем иконку из ресурсов EXE
+        HICON hIcon = LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_ICON1));
+
+        if (hIcon) {
+            SendMessage(hwnd, WM_SETICON, ICON_SMALL, (LPARAM)hIcon);
+            SendMessage(hwnd, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
+        }
     }
 
     // Шрифты
@@ -234,7 +253,6 @@ int main(int argc, char** argv) {
             if (currentLevel == 1) targetCars = 20;      // Easy
             else if (currentLevel == 2) targetCars = 30;
             else if (currentLevel == 3) targetCars = 40;
-            else targetCars = 30;
 
             if (!isEndgame) gameTimer += deltaTime;
 

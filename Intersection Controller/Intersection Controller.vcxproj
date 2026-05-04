@@ -154,6 +154,13 @@
     <ClInclude Include="header\levels.h" />
     <ClInclude Include="header\render.h" />
     <ClInclude Include="header\vehicle.h" />
+    <ClInclude Include="resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Intersection Controller.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\x64\Debug\icon.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

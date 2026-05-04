@@ -1,6 +1,7 @@
 #include "../header/common.h"
 #include "../header/vehicle.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 void saveGame(const char* filename) {

@@ -694,16 +694,21 @@ void render(void) {
             int seconds = (int)gameTimer % 60;
 
             sprintf(timerText, "TIME: %02d:%02d", minutes, seconds);
-            drawText(fontBase, 1025, 30, timerText);
+            drawText(fontBase, 1015, 30, timerText);
 
             // Счетчик проехавших машин
             char statsText[32];
-            sprintf(statsText, "CARS PASSED: %d", carsPassedCount);
-            drawText(fontBase, 1025, 60, statsText);
+            int targetCars;
+            if (currentLevel == 1) targetCars = 20;
+            else if (currentLevel == 2) targetCars = 30;
+            else if (currentLevel == 3) targetCars = 40;
+
+            sprintf(statsText, "CARS PASSED: %d/%d", carsPassedCount, targetCars);
+            drawText(fontBase, 1015, 60, statsText);
 
             // Счетчик жизней
             sprintf(statsText, "LIVES: %d", lives);
-            drawText(fontBase, 1025, 90, statsText);
+            drawText(fontBase, 1015, 90, statsText);
         }
 
         // Конец игры
