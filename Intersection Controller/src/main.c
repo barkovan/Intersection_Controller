@@ -126,11 +126,6 @@ void limit_fps(int target_fps) {
 int main(int argc, char** argv) {
     srand((unsigned int)time(NULL));
 
-    // Скрытие консольного окна
-    HWND hWnd = GetConsoleWindow();
-    ShowWindow(hWnd, SW_HIDE);
-
-
     loadHighScores();
 
     glutInit(&argc, argv);
