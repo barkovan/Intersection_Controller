@@ -187,7 +187,9 @@ void loadLevel(int levelId) {
         gameMap[17][0] = TILE_TREE_RED;
         gameMap[15][30] = TILE_TREE_BLACKGREEN;
         gameMap[4][19] = TILE_TREE;
-        gameMap[13][19] = TILE_TREE_ORANGE;
+        gameMap[17][17] = TILE_TREE_ORANGE;
+        gameMap[10][0] = TILE_TREE_ORANGE;
+        gameMap[12][19] = TILE_TREE_BLACKGREEN;
     }
     else if (levelId == 3) { // hard
         // 1. Главная горизонтальная дорога (на всю ширину)
@@ -261,14 +263,14 @@ void loadLevel(int levelId) {
         gameMap[15][17] = TILE_HOUSE_BLACK;
         gameMap[15][28] = TILE_HOUSE_BLACK2;
 
-        // Сверху по центру
+        // Деревья
         gameMap[1][14] = TILE_TREE_GREEN;
-        gameMap[4][18] = TILE_TREE_ORANGE;
-
-        gameMap[6][31] = TILE_TREE_GREEN;
-
-        // Справа сверху
+        gameMap[0][21] = TILE_TREE_ORANGE;
+        gameMap[7][31] = TILE_TREE_GREEN;
         gameMap[1][28] = TILE_TREE_RED;
+        gameMap[10][1] = TILE_TREE_ORANGE;
+        gameMap[17][12] = TILE_TREE_ORANGE;
+        gameMap[5][17] = TILE_TREE_BLACKGREEN;
 
         for (int x = 0; x < 7; x++) {
             gameMap[5][x] = TILE_BUSH_HOR;

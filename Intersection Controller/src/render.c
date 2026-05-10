@@ -314,11 +314,11 @@ static void drawTile(int x, int y, int type) {
     case TILE_ROAD_LEFT:
     case TILE_ROAD_UP:
     case TILE_ROAD_DOWN:
+    case TILE_SPAWN:
     case TILE_INTERSECT:               glColor3f(0.2f, 0.2f, 0.2f); break;
     case TILE_TRAFFIC_LIGHT_GREEN:     glColor3f(0.3f, 0.4f, 0.3f); break;
     case TILE_TRAFFIC_LIGHT_YELLOW:    glColor3f(0.4f, 0.4f, 0.2f); break;
     case TILE_TRAFFIC_LIGHT_RED:       glColor3f(0.4f, 0.3f, 0.3f); break;
-    case TILE_SPAWN:                   glColor3f(0.1f, 0.1f, 0.1f); break;
     case TILE_SIDEWALK:                glColor3f(0.55f, 0.55f, 0.55f); break;
     default:                           glColor3f(0.0f, 0.0f, 0.0f);
     }
@@ -370,8 +370,8 @@ static void drawTile(int x, int y, int type) {
         }
     }
 
-    // Стрелки направления на дорогах
     if (isPauseMode) {
+        // Стрелки направления на дорогах
         glColor3f(0.5f, 0.5f, 0.5f);
         glLineWidth(2.0f);
         glBegin(GL_LINES);
@@ -400,6 +400,15 @@ static void drawTile(int x, int y, int type) {
             glVertex2f(fx + 20, fy + 15); glVertex2f(fx + 20, fy + 25);
         }
         glEnd();
+
+        // Рамка спавнера
+        if (type == TILE_SPAWN) {
+            glColor3f(0.0f, 1.0f, 0.5f);
+            glBegin(GL_LINE_LOOP);
+            glVertex2f(fx + 5, fy + 5); glVertex2f(fx + 35, fy + 5);
+            glVertex2f(fx + 35, fy + 35); glVertex2f(fx + 5, fy + 35);
+            glEnd();
+        }
     }
 
     // Светофор (зелёный / жёлтый / красный круг с ободком)
@@ -417,15 +426,6 @@ static void drawTile(int x, int y, int type) {
         else     glColor3f(1.0f, 0.0f, 0.0f);
 
             drawFilledCircle(centerX, centerY, lightRadius, 30);
-    }
-
-    // Рамка спавнера
-    if (type == TILE_SPAWN) {
-        glColor3f(0.0f, 1.0f, 0.5f);
-        glBegin(GL_LINE_LOOP);
-        glVertex2f(fx + 5, fy + 5); glVertex2f(fx + 35, fy + 5);
-        glVertex2f(fx + 35, fy + 35); glVertex2f(fx + 5, fy + 35);
-        glEnd();
     }
 }
 
