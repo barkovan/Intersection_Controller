@@ -32,6 +32,9 @@ GLuint fontBaseTitle = 0;
 GLuint fontBase = 0;
 GLuint fontBaseHov = 0;
 
+float fontScale = 1.0f;
+float currentFontScale = 0.0f;
+
 // UI
 Button buttons[5];
 Button levelButtons[4];
@@ -47,6 +50,7 @@ GLuint helpBgTex = 0;
 GLuint endgameBgTex = 0;
 
 GLuint carTextures[2] = { 0 };
+GLuint boomTex = 0;
 int carTexCount = 0;
 
 GLuint houseTex = 0;
@@ -136,7 +140,7 @@ int main(int argc, char** argv) {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
-    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+    //glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
     window = glfwCreateWindow(wWidth, wHeight, "Traffic Simulator", NULL, NULL);
     if (!window) {
@@ -144,6 +148,7 @@ int main(int argc, char** argv) {
         return -1;
     }
 
+    glfwSetWindowAspectRatio(window, 16, 9); // ограничение пропорций окна
     glfwMakeContextCurrent(window);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
@@ -166,18 +171,19 @@ int main(int argc, char** argv) {
     }
 
     // Шрифты
-    buildTitleFont();
-    buildBaseFont();
-    buildBaseFontHov();
+    if (AddFontResourceEx(TEXT("font/BeatMark-Regular.ttf"), FR_PRIVATE, NULL) == 0) {
+        printf("Failed to load font file!\n");
+    }
+    update_all_fonts();
 
     // Начальная настройка проекции
     framebuffer_size_callback(window, wWidth, wHeight);
 
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // Черный фон
-    glClear(GL_COLOR_BUFFER_BIT);
-
     // Окно загрузки
-    drawText(fontBaseTitle, 460.0f, 360.0f, "LOADING...");
+    glClearColor(0, 0, 0, 1); // Черный фон
+    glClear(GL_COLOR_BUFFER_BIT);
+    glColor3f(1.0f, 1.0f, 1.0f);
+    drawText(fontBaseTitle, GX(12), GY(9), "LOADING...");
     glfwSwapBuffers(window);
     glFinish();
 
@@ -194,6 +200,7 @@ int main(int argc, char** argv) {
 
     carTextures[0] = loadTexture("assets/car.png");
     carTextures[1] = loadTexture("assets/car2.png");
+    boomTex = loadTexture("assets/boom.png");
     carTexCount = 2;
 
     houseTex = loadTexture("assets/house.png");
@@ -277,7 +284,7 @@ int main(int argc, char** argv) {
     if (fontBase)      glDeleteLists(fontBase, 256);
     if (fontBaseHov)   glDeleteLists(fontBaseHov, 256);
 
-    RemoveFontResourceEx(TEXT("../font/BeatMark-Regular.ttf"), FR_PRIVATE, NULL);
+    RemoveFontResourceEx(TEXT("font/BeatMark-Regular.ttf"), FR_PRIVATE, NULL);
 
     clearAllVehicles();
 

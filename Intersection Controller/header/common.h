@@ -33,6 +33,7 @@ extern GLuint endgameBgTex;       // фоновая клякса (окно ко�
 
 
 extern GLuint carTextures[2];     // тектуры машин
+extern GLuint boomTex;            // текстура взрыва
 extern int carTexCount;
 
 extern GLuint houseTex;           // текстура дома
@@ -74,6 +75,11 @@ extern GLuint fontBaseTitle;
 extern GLuint fontBase;
 extern GLuint fontBaseHov;
 
+extern float currentFontScale;
+extern float fontScale;
+
+void update_all_fonts();
+
 // UI-элементы
 extern Button buttons[5];
 extern Button levelButtons[4];
@@ -82,8 +88,8 @@ extern float buttonScale[10];
 
 // Сетка
 #define GRID_SIZE 40
-#define GX(col) ((col) * GRID_SIZE)
-#define GY(row) ((row) * GRID_SIZE)
+#define VIRTUAL_WIDTH  1280.0f
+#define VIRTUAL_HEIGHT 720.0f
 
 extern int showDebugGrid;
 
@@ -91,6 +97,9 @@ extern int showDebugGrid;
 #define MAP_WIDTH 32
 #define MAP_HEIGHT 18
 extern int gameMap[MAP_HEIGHT][MAP_WIDTH];
+
+#define GX(x) ((x) * (VIRTUAL_WIDTH / (float)MAP_WIDTH))
+#define GY(y) ((y) * (VIRTUAL_HEIGHT / (float)MAP_HEIGHT))
 
 extern int currentBrush; // текущая плитка
 
@@ -146,6 +155,11 @@ typedef struct Vehicle {
     int dirX, dirY;
     int canTurn;
     GLuint texID;
+
+    // Для аварии
+    bool isExploding;
+    float explosionTimer;
+
     struct Vehicle* next;
     struct Vehicle* prev;
 } Vehicle;

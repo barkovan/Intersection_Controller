@@ -39,8 +39,12 @@ void initEndgameButtons(void) {
 }
 
 void cursor_position_callback(GLFWwindow* w, double x, double y) {
-    mouseX = (int)x;
-    mouseY = (int)y;
+    int width, height;
+    glfwGetWindowSize(w, &width, &height); // Получаем текущий размер окна
+
+    // Пересчитываем экранные пиксели в виртуальные координаты 1280x720
+    mouseX = (int)(x * VIRTUAL_WIDTH / width);
+    mouseY = (int)(y * VIRTUAL_HEIGHT / height);
 }
 
 void mouse_button_callback(GLFWwindow* w, int button, int action, int mods) {
@@ -181,6 +185,11 @@ void framebuffer_size_callback(GLFWwindow* w, int width, int height) {
     glViewport(0, 0, width, height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glOrtho(0, 1280, 720, 0, -1, 1);
+
+    glOrtho(0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT, 0, -1, 1);
+
     glMatrixMode(GL_MODELVIEW);
+
+    fontScale = (float)width / VIRTUAL_WIDTH;
+    update_all_fonts();
 }

@@ -21,6 +21,9 @@ Vehicle* createVehicle(float x, float y, GLuint texID) {
     newV->canTurn = 1;
     newV->texID = texID;
 
+    newV->isExploding = false;
+    newV->explosionTimer = 0.0f;
+
     // Вставка в начало двусвязного списка
     newV->prev = NULL;
     newV->next = vehicleList;
@@ -78,6 +81,15 @@ void updateVehicles(float dt) {
     while (v != NULL) {
         // Запоминаем следующую машину сразу, т.к. текущую можем удалить
         Vehicle* nextVehicle = v->next;
+
+        if (v->isExploding) {
+            v->explosionTimer -= dt;
+            if (v->explosionTimer <= 0) {
+                deleteVehicle(v); // Удаляем машину спустя секунду
+            }
+            v = nextVehicle;
+            continue; // Пропускаем расчет движения для взрывающейся машины
+        }
 
         int currGx = (int)(v->x / 40.0f);
         int currGy = (int)(v->y / 40.0f);
@@ -174,27 +186,32 @@ void updateVehicles(float dt) {
         int crashed = 0;
         while (crashOther != NULL) {
             if (v == crashOther) { crashOther = crashOther->next; continue; }
+
             float dx = crashOther->x - v->x;
             float dy = crashOther->y - v->y;
             float centerDist = sqrtf(dx * dx + dy * dy);
 
             if (centerDist < carLength * 0.70f) {
                 // сохраняем следующий за crashOther, чтобы не потерять nextVehicle
-                Vehicle* otherNext = crashOther->next;
-                deleteVehicle(crashOther);
+                if (!v->isExploding) {
+                    // Активируем взрыв для обеих машин
+                    v->isExploding = true;
+                    v->explosionTimer = 1.0f; // 1 секунда до исчезновения
+                    v->speed = 0.0f;          // Останавливаем на месте
 
-                // если nextVehicle указывал на crashOther, сдвигаемся дальше
-                if (nextVehicle == crashOther)
-                    nextVehicle = otherNext;
+                    crashOther->isExploding = true;
+                    crashOther->explosionTimer = 1.0f;
+                    crashOther->speed = 0.0f;
 
-                deleteVehicle(v);
+                    if (currentLevel != 0) lives--; // Отнимаем жизнь
+                }
+
                 crashed = 1;
                 break;
             }
             crashOther = crashOther->next;
         }
         if (crashed) {
-            if (currentLevel != 0) lives--;
             v = nextVehicle;
             continue;
         }

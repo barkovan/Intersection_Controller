@@ -38,43 +38,43 @@ GLuint loadTexture(const char* filename) {
 
 // ========== ШРИФТЫ ==========
 
-// Создаёт крупный шрифт для заголовка
-void buildTitleFont(void) {
-    HDC hDC = wglGetCurrentDC();
-    HFONT hFont = CreateFont(130, 0, 0, 0, FW_BOLD, FALSE, FALSE, FALSE,
+#define BASE_TITLE_SIZE 130
+#define BASE_TEXT_SIZE 30
+#define BASE_HOV_TEXT_SIZE 40
+
+// Функция создания шрифта
+GLuint buildFont(const char* name, int size, int weight) {
+    GLuint base = glGenLists(256);
+    HFONT font = CreateFont(size, 0, 0, 0, FW_BOLD, FALSE, FALSE, FALSE,
         DEFAULT_CHARSET, OUT_TT_PRECIS, CLIP_DEFAULT_PRECIS,
-        ANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, TEXT("Beat Mark"));
-    HFONT oldFont = (HFONT)SelectObject(hDC, hFont);
-    fontBaseTitle = glGenLists(256);
-    wglUseFontBitmaps(hDC, 0, 256, fontBaseTitle);
-    SelectObject(hDC, oldFont);
-    DeleteObject(hFont);
+        ANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, TEXT("Arial"));
+
+    if (strcmp(name, "Beat Mark") == 0) {
+        font = CreateFont(size, 0, 0, 0, FW_BOLD, FALSE, FALSE, FALSE,
+            DEFAULT_CHARSET, OUT_TT_PRECIS, CLIP_DEFAULT_PRECIS,
+            ANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, TEXT("Beat Mark"));
+    }
+
+    HDC hdc = wglGetCurrentDC();
+    SelectObject(hdc, font);
+    wglUseFontBitmaps(hdc, 0, 256, base);
+    DeleteObject(font);
+    return base;
 }
 
-// Создаёт обычный шрифт (30pt)
-void buildBaseFont(void) {
-    HDC hDC = wglGetCurrentDC();
-    HFONT hFont = CreateFont(30, 0, 0, 0, FW_BOLD, FALSE, FALSE, FALSE,
-        ANSI_CHARSET, OUT_TT_PRECIS, CLIP_DEFAULT_PRECIS,
-        ANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, TEXT("Arial"));
-    HFONT oldFont = (HFONT)SelectObject(hDC, hFont);
-    fontBase = glGenLists(256);
-    wglUseFontBitmaps(hDC, 0, 256, fontBase);
-    SelectObject(hDC, oldFont);
-    DeleteObject(hFont);
-}
+void update_all_fonts() {
+    // 1. Удаляем старые списки, если они были созданы
+    if (fontBaseTitle) glDeleteLists(fontBaseTitle, 256);
+    if (fontBase)      glDeleteLists(fontBase, 256);
+    if (fontBaseHov)   glDeleteLists(fontBaseHov, 256);
 
-// Создаёт увеличенный шрифт (40pt) для пунктов меню при наведении
-void buildBaseFontHov(void) {
-    HDC hDC = wglGetCurrentDC();
-    HFONT hFont = CreateFont(40, 0, 0, 0, FW_BOLD, FALSE, FALSE, FALSE,
-        ANSI_CHARSET, OUT_TT_PRECIS, CLIP_DEFAULT_PRECIS,
-        ANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, TEXT("Arial"));
-    HFONT oldFont = (HFONT)SelectObject(hDC, hFont);
-    fontBaseHov = glGenLists(256);
-    wglUseFontBitmaps(hDC, 0, 256, fontBaseHov);
-    SelectObject(hDC, oldFont);
-    DeleteObject(hFont);
+    // 2. Создаем заново с новым размером
+    fontBaseTitle = buildFont("Beat Mark", (int)(BASE_TITLE_SIZE * fontScale), FW_BOLD);
+    fontBase = buildFont("Arial", (int)(BASE_TEXT_SIZE * fontScale), FW_BOLD);
+    fontBaseHov = buildFont("Arial", (int)(BASE_HOV_TEXT_SIZE * fontScale), FW_BOLD);
+
+    // 3. Запоминаем текущий масштаб
+    currentFontScale = fontScale;
 }
 
 // Выводит текст в заданных экранных координатах
@@ -122,17 +122,20 @@ static void drawButton(const Button* btn, int index, int isHovered) {
     }
 
     // Текст (разная ширина букв для первой кнопки)
+    GLuint currentFont = (isHovered) ? fontBaseHov : fontBase;
     float charWidth = 14.5f;
     if (index == 0) charWidth = 12.5f;
 
-    float textWidth = strlen(btn->text) * charWidth;
-    float textX = btn->x + offsetX + (newW - textWidth) / 2.0f;
-    float textY = btn->y + offsetY + newH * 0.5f + 11.0f;
+    charWidth = (isHovered) ? charWidth * 1.3f : charWidth;
+
+    float currentTextWidth = strlen(btn->text) * charWidth;
+
+    float textX = btn->x + offsetX + (newW - currentTextWidth) / 2.0f;
+    float textY = btn->y + offsetY + (newH / 2.0f) + 11.0f;
 
     if (isHovered) glColor3f(1.0f, 0.92f, 0.70f);
-    else           glColor3f(0.95f, 0.95f, 0.95f);
-
-    drawText(fontBase, textX, textY, btn->text);
+    else glColor3f(0.95f, 0.95f, 0.95f);
+    drawText(currentFont, textX, textY, btn->text);
 }
 
 // Обновляет анимацию масштабирования кнопок при наведении
@@ -433,6 +436,16 @@ static void drawTile(int x, int y, int type) {
 
 // Рисует машину с текстурой и поворотом в зависимости от направления
 void drawVehicle(Vehicle* v) {
+    if (!v) return;
+
+    // Если машина взрывается, рисуем текстуру взрыва, иначе — обычную текстуру машины
+    if (v->isExploding) {
+        glBindTexture(GL_TEXTURE_2D, boomTex);
+    }
+    else {
+        glBindTexture(GL_TEXTURE_2D, v->texID);
+    }
+
     glPushMatrix();
     glTranslatef(v->x, v->y, 0.0f);
 
@@ -445,7 +458,6 @@ void drawVehicle(Vehicle* v) {
     glRotatef(angle - 90.0f, 0.0f, 0.0f, 1.0f);
 
     glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, v->texID);
     glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
     float length = 55.0f;
@@ -547,9 +559,21 @@ void drawEndGameOverlay(const char* title, bool isVictory) {
 void drawVictoryScreen() { drawEndGameOverlay("LEVEL COMPLETED", true); }
 void drawDefeatScreen() { drawEndGameOverlay("FAILED", false); }
 
+// Установка разрешения
+void setup_projection() {
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+
+    glOrtho(0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT, 0, -1, 1);
+
+    glMatrixMode(GL_MODELVIEW);
+}
+
 // ========== ГЛАВНЫЙ РЕНДЕР ==========
 
 void render(void) {
+    setup_projection();
+
     glClearColor(0.08f, 0.15f, 0.10f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
