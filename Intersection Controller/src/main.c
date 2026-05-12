@@ -263,7 +263,7 @@ int main(int argc, char** argv) {
                 initEndgameButtons();
             }
 
-            if (carsPassedCount >= targetCars) {
+            if (currentLevel != 0 && carsPassedCount >= targetCars) {
                 addHighScore(currentLevel, gameTimer);
                 saveHighScores();
                 isEndgame = 1;
